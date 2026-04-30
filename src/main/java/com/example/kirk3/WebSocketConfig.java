@@ -1,21 +1,27 @@
 package com.example.kirk3;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.*;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
-    private final ChatMessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final JavaMailSender mailSender;
 
-    public WebSocketConfig(ChatMessageRepository m, UserRepository u) {
-        this.messageRepository = m;
-        this.userRepository = u;
+    public WebSocketConfig(UserRepository userRepository, ChatMessageRepository chatMessageRepository, JavaMailSender mailSender) {
+        this.userRepository = userRepository;
+        this.chatMessageRepository = chatMessageRepository;
+        this.mailSender = mailSender;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ChatWebSocketHandler(messageRepository, userRepository), "/chat").setAllowedOrigins("*");
+        registry.addHandler(new ChatWebSocketHandler(userRepository, chatMessageRepository, mailSender), "/chat")
+                .setAllowedOrigins("*");
     }
 }

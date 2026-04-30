@@ -7,7 +7,6 @@ import java.util.TimeZone;
 
 @SpringBootApplication
 public class Kirk3Application {
-
     public static void main(String[] args) {
         SpringApplication.run(Kirk3Application.class, args);
     }

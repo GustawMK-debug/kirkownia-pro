@@ -4,189 +4,130 @@
     <meta charset="UTF-8">
     <title>Kirkownia PRO</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #36393f; color: #dcddde; display: flex; height: 100vh; margin: 0; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: #36393f; color: #dcddde; display: flex; height: 100vh; margin: 0; overflow: hidden; }
         #auth-container { position: fixed; width: 100%; height: 100%; background: #2f3136; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .auth-box { background: #36393f; padding: 32px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); width: 400px; text-align: center; }
+        .auth-box { background: #36393f; padding: 32px; border-radius: 8px; width: 400px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         input { width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 3px; border: none; background: #202225; color: white; box-sizing: border-box; }
         button { width: 100%; padding: 10px; background: #5865f2; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #4752c4; }
         #sidebar { width: 240px; background: #2f3136; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 15px; font-weight: bold; border-bottom: 1px solid #202225; display: flex; justify-content: space-between; align-items: center; }
-        #channels-list { flex: 1; padding: 10px; overflow-y: auto; }
-        .channel { padding: 8px; cursor: pointer; border-radius: 4px; margin-bottom: 2px; color: #8e9297; }
-        .channel:hover { background: #393c43; color: #dcddde; }
+        .sidebar-header { padding: 15px; font-weight: bold; border-bottom: 1px solid #202225; display: flex; justify-content: space-between; }
+        #channels-list { flex: 1; padding: 10px; }
+        .channel { padding: 8px; cursor: pointer; border-radius: 4px; color: #8e9297; margin-bottom: 2px; }
         .channel.active { background: #393c43; color: white; }
-        .channel::before { content: '# '; }
-        #chat-area { flex: 1; display: flex; flex-direction: column; background: #36393f; }
+        .channel:hover { background: #34373c; }
+        #chat-area { flex: 1; display: flex; flex-direction: column; }
         #messages { flex: 1; padding: 20px; overflow-y: auto; }
         .message { margin-bottom: 16px; }
-        .msg-header { display: flex; align-items: baseline; gap: 8px; }
-        .msg-user { font-weight: bold; color: white; }
-        .msg-time { font-size: 0.75rem; color: #72767d; }
-        .msg-content { margin-top: 4px; color: #dcddde; }
-        #input-area { padding: 0 20px 20px 20px; }
+        .msg-user { font-weight: bold; color: white; margin-right: 8px; }
+        .msg-time { font-size: 0.7rem; color: #72767d; }
+        #input-area { padding: 20px; }
         #msg-input { width: 100%; padding: 11px; background: #40444b; border-radius: 8px; border: none; color: white; }
-        .vc-btn { background: #3ba55d; margin-top: 10px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
-
 <div id="auth-container">
     <div class="auth-box" id="login-box">
-        <h2 style="color:white">Witaj ponownie!</h2>
-        <input type="text" id="login-username" placeholder="Nazwa użytkownika">
+        <h2 style="color:white">Logowanie</h2>
+        <input type="text" id="login-username" placeholder="Login">
         <input type="password" id="login-password" placeholder="Hasło">
         <button onclick="login()">Zaloguj się</button>
-        <p style="font-size:0.9rem; margin-top:15px">Potrzebujesz konta? <span style="color:#00aff4; cursor:pointer" onclick="toggleAuth()">Zarejestruj się</span></p>
+        <p style="margin-top:15px; font-size:0.9rem">Nie masz konta? <span style="color:#00aff4; cursor:pointer" onclick="toggleAuth()">Zarejestruj się</span></p>
     </div>
     <div class="auth-box" id="register-box" style="display:none">
-        <h2 style="color:white">Stwórz konto</h2>
+        <h2 style="color:white">Rejestracja</h2>
         <input type="email" id="reg-email" placeholder="E-mail">
-        <input type="text" id="reg-username" placeholder="Nazwa użytkownika">
+        <input type="text" id="reg-username" placeholder="Login">
         <input type="password" id="reg-password" placeholder="Hasło">
         <button onclick="register()">Zarejestruj się</button>
-        <p style="font-size:0.9rem; margin-top:15px">Masz już konto? <span style="color:#00aff4; cursor:pointer" onclick="toggleAuth()">Zaloguj się</span></p>
+        <p style="margin-top:15px; font-size:0.9rem">Masz konto? <span style="color:#00aff4; cursor:pointer" onclick="toggleAuth()">Zaloguj się</span></p>
+    </div>
+    <div class="auth-box" id="verify-box" style="display:none">
+        <h2 style="color:white">Weryfikacja</h2>
+        <p>Kod wysłany na e-mail</p>
+        <input type="text" id="verify-code" placeholder="6-cyfrowy kod">
+        <button onclick="verify()">Potwierdź</button>
     </div>
 </div>
-
 <div id="sidebar">
-    <div class="sidebar-header">
-        KIRKOWNIA PRO
-        <span style="cursor:pointer" onclick="createChannel()">+</span>
-    </div>
+    <div class="sidebar-header">KIRKOWNIA <span style="cursor:pointer" onclick="createChannel()">+</span></div>
     <div id="channels-list"></div>
-    <div style="padding:15px; border-top:1px solid #202225">
-        <button class="vc-btn" onclick="toggleVC()">Połącz z VC</button>
-        <div id="vc-status" style="font-size:0.7rem; margin-top:5px; color:#3ba55d; display:none">● Połączono głosowo</div>
-    </div>
 </div>
-
 <div id="chat-area">
     <div id="messages"></div>
-    <div id="input-area">
-        <input type="text" id="msg-input" placeholder="Napisz na tym kanale..." onkeypress="if(event.key==='Enter') sendMessage()">
-    </div>
+    <div id="input-area"><input type="text" id="msg-input" placeholder="Napisz wiadomość..." onkeypress="if(event.key==='Enter') sendMessage()"></div>
 </div>
-
 <script>
-    let socket;
-    let currentUser = null;
-    let currentChannel = 'ogolny';
-
+    let socket, currentUser, currentChannel = 'ogolny', userToVerify;
     function connect() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        socket = new WebSocket(`${protocol}//${window.location.host}/chat`);
-
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'LOGIN_OK') {
-                currentUser = data.username;
+        const prot = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        socket = new WebSocket(`${prot}//${window.location.host}/chat`);
+        socket.onmessage = (e) => {
+            const d = JSON.parse(e.data);
+            if (d.type === 'LOGIN_OK') {
+                currentUser = d.username;
                 document.getElementById('auth-container').style.display = 'none';
-                updateChannelsList(data.channels);
+                updateChannels(d.channels);
                 switchChannel('ogolny');
-            } else if (data.type === 'CHAT') {
-                if (data.channel === currentChannel) displayMessage(data);
-            } else if (data.type === 'HISTORY') {
+            } else if (d.type === 'NEED_VERIFY') {
+                userToVerify = d.username;
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('register-box').style.display = 'none';
+                document.getElementById('verify-box').style.display = 'block';
+            } else if (d.type === 'REGISTER_OK') {
+                alert("Zweryfikowano! Zaloguj się.");
+                location.reload();
+            } else if (d.type === 'CHAT' && d.channel === currentChannel) {
+                displayMsg(d);
+            } else if (d.type === 'HISTORY') {
                 document.getElementById('messages').innerHTML = '';
-                data.messages.forEach(displayMessage);
-            } else if (data.type === 'CHANNELS_UPDATE') {
-                updateChannelsList(data.channels);
-            } else if (data.type === 'ERROR') {
-                alert(data.message);
-            }
+                d.messages.forEach(displayMsg);
+            } else if (d.type === 'CHANNELS_UPDATE') {
+                updateChannels(d.channels);
+            } else if (d.type === 'ERROR') alert(d.message);
         };
-
         socket.onclose = () => setTimeout(connect, 2000);
     }
-
     function toggleAuth() {
-        const l = document.getElementById('login-box');
-        const r = document.getElementById('register-box');
+        const l = document.getElementById('login-box'), r = document.getElementById('register-box');
         l.style.display = l.style.display === 'none' ? 'block' : 'none';
         r.style.display = r.style.display === 'none' ? 'block' : 'none';
     }
-
-    function login() {
-        const u = document.getElementById('login-username').value;
-        const p = document.getElementById('login-password').value;
-        socket.send(JSON.stringify({type:'LOGIN', username:u, password:p}));
-    }
-
-    function register() {
-        const e = document.getElementById('reg-email').value;
-        const u = document.getElementById('reg-username').value;
-        const p = document.getElementById('reg-password').value;
-        socket.send(JSON.stringify({type:'REGISTER', email:e, username:u, password:p}));
-    }
-
-    function updateChannelsList(channels) {
-        const list = document.getElementById('channels-list');
-        list.innerHTML = '';
-        channels.sort().forEach(ch => {
+    function login() { socket.send(JSON.stringify({type:'LOGIN', username:document.getElementById('login-username').value, password:document.getElementById('login-password').value})); }
+    function register() { socket.send(JSON.stringify({type:'REGISTER', email:document.getElementById('reg-email').value, username:document.getElementById('reg-username').value, password:document.getElementById('reg-password').value})); }
+    function verify() { socket.send(JSON.stringify({type:'VERIFY', username:userToVerify, code:document.getElementById('verify-code').value})); }
+    function updateChannels(chs) {
+        const l = document.getElementById('channels-list'); l.innerHTML = '';
+        chs.sort().forEach(ch => {
             const div = document.createElement('div');
             div.className = `channel ${ch === currentChannel ? 'active' : ''}`;
-            div.innerText = ch;
+            div.innerText = '# ' + ch;
             div.onclick = () => switchChannel(ch);
-            list.appendChild(div);
+            l.appendChild(div);
         });
     }
-
-    function createChannel() {
-        const name = prompt("Podaj nazwę nowego kanału:");
-        if (name) socket.send(JSON.stringify({type: 'CREATE_CHANNEL', name: name}));
+    function switchChannel(ch) {
+        currentChannel = ch;
+        socket.send(JSON.stringify({type:'JOIN_CHANNEL', channel:ch}));
+        document.querySelectorAll('.channel').forEach(el => el.classList.toggle('active', el.innerText.includes(ch)));
     }
-
-    function switchChannel(channelName) {
-        currentChannel = channelName;
-        document.querySelectorAll('.channel').forEach(c => {
-            c.classList.toggle('active', c.innerText === channelName);
-        });
-        socket.send(JSON.stringify({type: 'JOIN_CHANNEL', channel: channelName}));
-    }
-
     function sendMessage() {
-        const input = document.getElementById('msg-input');
-        if (input.value.trim() && currentUser) {
-            socket.send(JSON.stringify({
-                type: 'CHAT',
-                content: input.value,
-                channel: currentChannel
-            }));
-            input.value = '';
+        const i = document.getElementById('msg-input');
+        if (i.value && currentUser) {
+            socket.send(JSON.stringify({type:'CHAT', content:i.value, channel:currentChannel}));
+            i.value = '';
         }
     }
-
-    function displayMessage(msg) {
-        const container = document.getElementById('messages');
-        const div = document.createElement('div');
+    function displayMsg(m) {
+        const c = document.getElementById('messages'), div = document.createElement('div');
         div.className = 'message';
-        const date = new Date(msg.timestamp);
-        const timeStr = date.toLocaleTimeString('pl-PL', {hour: '2-digit', minute:'2-digit'});
-        div.innerHTML = `
-            <div class="msg-header">
-                <span class="msg-user">${msg.sender}</span>
-                <span class="msg-time">Dzisiaj o ${timeStr}</span>
-            </div>
-            <div class="msg-content">${msg.content}</div>
-        `;
-        container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
+        const t = new Date(m.timestamp).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'});
+        div.innerHTML = `<div><span class="msg-user">${m.sender}</span><span class="msg-time">${t}</span></div><div style="margin-top:4px">${m.content}</div>`;
+        c.appendChild(div); c.scrollTop = c.scrollHeight;
     }
-
-    function toggleVC() {
-        const status = document.getElementById('vc-status');
-        const btn = document.querySelector('.vc-btn');
-        if (status.style.display === 'none') {
-            status.style.display = 'block';
-            btn.innerText = 'Rozłącz z VC';
-            btn.style.background = '#ed4245';
-        } else {
-            status.style.display = 'none';
-            btn.innerText = 'Połącz z VC';
-            btn.style.background = '#3ba55d';
-        }
+    function createChannel() {
+        const n = prompt("Nazwa kanału:");
+        if (n) socket.send(JSON.stringify({type:'CREATE_CHANNEL', name:n}));
     }
-
     connect();
 </script>
 </body>
