@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final Set<String> channels = new CopyOnWriteArraySet<>(Set.of("ogolny", "gry", "pomoc"));
+    private final Set<String> channels = new CopyOnWriteArraySet<>(Set.of("ogolny", "strefa-tworcy", "cyber-pub"));
     private final UserRepository userRepository;
     private final ChatMessageRepository messageRepository;
     private final JavaMailSender mailSender;
@@ -45,12 +45,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             String email = json.get("email").asText();
             String user = json.get("username").asText();
             String pass = json.get("password").asText();
+
             if (userRepository.findByUsername(user).isPresent()) {
-                session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Użytkownik istnieje\"}"));
+                session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Ten Nick jest zajęty!\"}"));
             } else {
                 String code = String.format("%06d", new Random().nextInt(999999));
-                userRepository.save(new UserAccount(email, user, pass, code));
-                sendEmail(email, code);
+                UserAccount account = new UserAccount(email, user, pass, code);
+                userRepository.save(account);
+
+                // Wysyłamy maila w tle, żeby nie blokować rejestracji
+                new Thread(() -> sendEmail(email, code)).start();
+
                 session.sendMessage(new TextMessage("{\"type\":\"NEED_VERIFY\",\"username\":\"" + user + "\"}"));
             }
         } else if ("VERIFY".equals(type)) {
@@ -63,7 +68,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                         userRepository.save(u);
                         session.sendMessage(new TextMessage("{\"type\":\"REGISTER_OK\"}"));
                     } else {
-                        session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Błędny kod\"}"));
+                        session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Kod jest niepoprawny!\"}"));
                     }
                 } catch (Exception e) {}
             });
@@ -81,7 +86,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                             session.sendMessage(new TextMessage("{\"type\":\"LOGIN_OK\",\"username\":\"" + user + "\",\"channels\":" + mapper.writeValueAsString(channels) + "}"));
                         } catch (Exception e) {}
                     },
-                    () -> { try { session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Błędne dane\"}")); } catch (Exception e) {} }
+                    () -> { try { session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Złe dane logowania!\"}")); } catch (Exception e) {} }
             );
         } else if ("CHAT".equals(type)) {
             String user = (String) session.getAttributes().get("user");
@@ -90,8 +95,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 String channel = json.get("channel").asText();
                 ChatMessage chatMsg = new ChatMessage(user, content, channel, LocalDateTime.now());
                 messageRepository.save(chatMsg);
-                String resp = mapper.writeValueAsString(Map.of("type","CHAT","sender",user,"content",content,"channel",channel,"timestamp",chatMsg.getTimestamp().toString()));
-                broadcast(resp);
+                broadcast(mapper.writeValueAsString(Map.of("type","CHAT","sender",user,"content",content,"channel",channel,"timestamp",chatMsg.getTimestamp().toString())));
             }
         } else if ("JOIN_CHANNEL".equals(type)) {
             String ch = json.get("channel").asText();
@@ -114,11 +118,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setTo(to);
-            msg.setSubject("Kod weryfikacyjny - Kirkownia");
-            msg.setText("Twój kod: " + code);
+            msg.setSubject("KOD WERYFIKACYJNY - KIRKOWNIA");
+            msg.setText("Twój kod do Cyber-Przestrzeni to: " + code);
             mailSender.send(msg);
         } catch (Exception e) {
-            System.err.println("Email error: " + e.getMessage());
+            System.err.println("Problem z mailem (Prawdopodobnie brak hasła aplikacji): " + e.getMessage());
         }
     }
 
