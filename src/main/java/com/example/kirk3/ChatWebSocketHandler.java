@@ -18,7 +18,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
     private final Map<String, String> userNames = new ConcurrentHashMap<>();
     private final Map<String, String> userVoiceChannels = new ConcurrentHashMap<>();
-    private final Set<String> textChannels = new CopyOnWriteArraySet<>(Set.of("ogolny", "strefa-gier", "projekty"));
+    private final Set<String> textChannels = new CopyOnWriteArraySet<>(Set.of("ogolny", "natura", "spokoj"));
     private final ChatMessageRepository messageRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -55,8 +55,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             var hist = messageRepository.findByChannelOrderByTimestampAsc(ch);
             session.sendMessage(new TextMessage(mapper.writeValueAsString(Map.of("type","HISTORY","channel",ch,"messages",hist))));
         } else if ("VC_JOIN".equals(type)) {
-            String vcName = json.get("vcName").asText();
-            userVoiceChannels.put(session.getId(), vcName);
+            userVoiceChannels.put(session.getId(), json.get("vcName").asText());
             broadcastVoiceState();
         } else if ("VC_STATE".equals(type)) {
             broadcast(message.getPayload());
@@ -69,9 +68,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         Map<String, Map<String, String>> voiceData = new ConcurrentHashMap<>();
         userVoiceChannels.forEach((sid, vc) -> {
             String name = userNames.get(sid);
-            if (name != null) {
-                voiceData.computeIfAbsent(vc, k -> new ConcurrentHashMap<>()).put(sid, name);
-            }
+            if (name != null) voiceData.computeIfAbsent(vc, k -> new ConcurrentHashMap<>()).put(sid, name);
         });
         broadcast(mapper.writeValueAsString(Map.of("type", "VC_UPDATE", "data", voiceData)));
     }

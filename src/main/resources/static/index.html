@@ -2,203 +2,170 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>NEXUS PROTOCOL // V4</title>
+    <title>Kirkownia // Aesthetic</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-        :root { --neon: #00f2ff; --bg: #050a0f; --panel: rgba(10, 25, 41, 0.8); --accent: #ff0077; }
-        body { margin: 0; background: var(--bg); color: var(--neon); font-family: 'Share Tech Mono', monospace; height: 100vh; display: flex; overflow: hidden; }
-        body::after { content: ""; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px); pointer-events: none; }
-        #auth-overlay { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; justify-content: center; align-items: center; transition: 1s; }
-        .nexus-box { padding: 40px; border: 1px solid var(--neon); background: var(--panel); box-shadow: 0 0 20px var(--neon); text-align: center; width: 400px; }
-        input { background: #000; border: 1px solid var(--neon); color: var(--neon); padding: 12px; width: 100%; box-sizing: border-box; margin-bottom: 20px; outline: none; }
-        button { background: var(--neon); border: none; color: #000; padding: 12px 25px; cursor: pointer; font-family: inherit; font-weight: bold; width: 100%; transition: 0.3s; }
-        button:hover { background: #fff; box-shadow: 0 0 15px #fff; }
-        #sidebar { width: 300px; border-right: 1px solid var(--neon); display: flex; flex-direction: column; background: rgba(0,0,0,0.4); }
-        .section-label { padding: 10px 20px; background: rgba(0, 242, 255, 0.1); font-size: 0.8rem; border-bottom: 1px solid var(--neon); margin-top: 10px; }
-        .item { padding: 12px 25px; cursor: pointer; transition: 0.2s; opacity: 0.7; }
-        .item:hover { opacity: 1; background: rgba(0, 242, 255, 0.05); }
-        .item.active { opacity: 1; color: #fff; border-left: 3px solid var(--neon); background: linear-gradient(90deg, rgba(0, 242, 255, 0.1), transparent); }
-        .vc-user { padding: 5px 40px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .vc-user.speaking { color: #00ff88; text-shadow: 0 0 10px #00ff88; transform: scale(1.05); }
-        .vc-user.muted { color: var(--accent); opacity: 0.5; }
-        #chat-main { flex: 1; display: flex; flex-direction: column; }
-        #msg-box { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .msg { padding: 15px; border-left: 2px solid var(--neon); background: rgba(0, 242, 255, 0.02); animation: slide 0.3s ease-out; }
-        @keyframes slide { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        .msg-info { font-size: 0.7rem; margin-bottom: 5px; opacity: 0.6; }
-        #input-area { padding: 25px; border-top: 1px solid var(--neon); }
-        .controls { padding: 15px; border-top: 1px solid var(--neon); display: flex; gap: 10px; }
-        .btn-mute { background: var(--accent); color: #fff; flex: 1; }
-        .btn-mute.active { background: #333; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        :root { --bg: #fdfdfd; --sidebar: #f4f7f5; --sage: #a3b18a; --forest: #3a5a40; --text-dark: #344e41; --text-light: #8e9e94; --white: #ffffff; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        #auth-overlay { position: fixed; inset: 0; z-index: 1000; background: var(--white); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1s; }
+        .auth-card { text-align: center; max-width: 320px; width: 100%; }
+        input { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #e0e0e0; font-family: inherit; font-size: 1rem; margin-bottom: 30px; outline: none; background: transparent; text-align: center; }
+        .btn-minimal { background: var(--forest); color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-size: 0.9rem; transition: 0.4s; }
+        #sidebar { width: 280px; background: var(--sidebar); display: flex; flex-direction: column; border-right: 1px solid #eeeeee; padding-top: 40px; }
+        .sidebar-title { padding: 0 30px; font-weight: 600; font-size: 0.8rem; letter-spacing: 2px; color: var(--text-light); margin-bottom: 20px; }
+        .nav-item { padding: 12px 30px; cursor: pointer; color: var(--text-light); font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .nav-item.active { color: var(--forest); font-weight: 600; border-right: 3px solid var(--sage); background: rgba(163, 177, 138, 0.05); }
+        .vc-user-list { padding-left: 55px; margin-bottom: 10px; font-size: 0.85rem; }
+        .vc-user { padding: 4px 0; color: var(--text-light); transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .vc-user.speaking { color: var(--forest); font-weight: 600; }
+        .dot { width: 6px; height: 6px; background: var(--sage); border-radius: 50%; opacity: 0; }
+        .speaking .dot { opacity: 1; }
+        #main-view { flex: 1; display: flex; flex-direction: column; }
+        #chat-header { padding: 30px 40px; border-bottom: 1px solid #f0f0f0; font-weight: 600; color: var(--forest); }
+        #messages-container { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        .msg-block { animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-meta { font-size: 0.75rem; color: var(--text-light); margin-bottom: 4px; }
+        #input-wrapper { padding: 30px 40px; }
+        #chat-input { width: 100%; padding: 18px 25px; border-radius: 15px; border: 1px solid #f0f0f0; outline: none; transition: 0.3s; }
+        .user-panel { margin-top: auto; padding: 25px; background: #fff; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .mute-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #eee; background: transparent; cursor: pointer; }
+        .mute-btn.active { background: #fee; color: #f66; }
     </style>
 </head>
 <body>
-
 <div id="auth-overlay">
-    <div class="nexus-box">
-        <h2 style="margin-top:0">// NEXUS ACCESS</h2>
-        <input type="text" id="nick" placeholder="WPISZ KOD IDENTYFIKACYJNY (NICK)">
-        <button onclick="access()">AUTORYZUJ WEJŚCIE</button>
+    <div class="auth-card">
+        <h2 style="font-weight:300; color:#3a5a40">KIRKOWNIA</h2>
+        <input type="text" id="username-in" placeholder="Podaj imię..." maxlength="15">
+        <button class="btn-minimal" onclick="startSession()">DOŁĄCZ</button>
     </div>
 </div>
-
 <div id="sidebar">
-    <div style="padding:20px; font-size:1.2rem; font-weight:bold; border-bottom: 1px solid var(--neon)">KIRKOWNIA_OS v4.0</div>
-    <div class="section-label">TEKST_PROTOCOLS</div>
-    <div id="text-channels"></div>
-    <div class="section-label">VOICE_NODES</div>
-    <div id="voice-channels">
-        <div class="item" onclick="joinVC('General-Comms')"># General-Comms</div>
-        <div id="users-General-Comms"></div>
-        <div class="item" onclick="joinVC('Tactical-Channel')"># Tactical-Channel</div>
-        <div id="users-Tactical-Channel"></div>
+    <div class="sidebar-title">KANAŁY TEKSTOWE</div>
+    <div id="text-nav"></div>
+    <div class="sidebar-title" style="margin-top:30px">GŁOSOWE</div>
+    <div id="voice-nav">
+        <div class="nav-item" onclick="joinVoice('Salon')">Salon</div>
+        <div id="users-Salon" class="vc-user-list"></div>
+        <div class="nav-item" onclick="joinVoice('Czytelnia')">Czytelnia</div>
+        <div id="users-Czytelnia" class="vc-user-list"></div>
     </div>
-    <div class="controls" id="vc-controls" style="display:none">
-        <button class="btn-mute" id="mute-btn" onclick="toggleMute()">MUTE_MIC</button>
-    </div>
-</div>
-
-<div id="chat-main">
-    <div id="msg-box"></div>
-    <div id="input-area">
-        <input type="text" id="msg-in" placeholder="NADAJ WIADOMOŚĆ..." onkeypress="if(event.key==='Enter') sendChat()">
+    <div class="user-panel" id="user-ctrl" style="display:none">
+        <span id="my-name" style="font-size: 0.85rem; font-weight: 600"></span>
+        <button class="mute-btn" id="m-btn" onclick="toggleMute()">🎤</button>
     </div>
 </div>
-
+<div id="main-view">
+    <div id="chat-header"># <span id="ch-name">ogolny</span></div>
+    <div id="messages-container"></div>
+    <div id="input-wrapper"><input type="text" id="chat-input" placeholder="Napisz..." onkeypress="if(event.key==='Enter') sendMsg()"></div>
+</div>
 <script>
-    let socket, currentUser, currentChannel = 'ogolny', currentVC = null;
-    let localStream, isMuted = false, audioCtx, analyser, dataArray;
-
-    function access() {
-        const nick = document.getElementById('nick').value;
-        if(nick) {
-            currentUser = nick;
-            connect();
-        }
-    }
-
-    function connect() {
+    let socket, myUser, myChannel = 'ogolny', myVC = null, localStream, isMuted = false, audioCtx, analyser, dataArray;
+    function startSession() {
+        const name = document.getElementById('username-in').value;
+        if(!name) return;
+        myUser = name;
+        document.getElementById('my-name').innerText = name;
         const prot = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         socket = new WebSocket(`${prot}//${window.location.host}/chat`);
-        socket.onopen = () => socket.send(JSON.stringify({type:'LOGIN', username:currentUser}));
         socket.onmessage = (e) => {
             const d = JSON.parse(e.data);
             if(d.type === 'LOGIN_OK') {
-                document.getElementById('auth-overlay').style.transform = 'translateY(-100%)';
-                renderChannels(d.channels);
-                switchText('ogolny');
-            } else if(d.type === 'CHAT' && d.channel === currentChannel) {
-                renderMsg(d);
+                document.getElementById('auth-overlay').style.opacity = '0';
+                setTimeout(() => document.getElementById('auth-overlay').style.display = 'none', 800);
+                document.getElementById('user-ctrl').style.display = 'flex';
+                buildNav(d.channels);
+                switchChannel('ogolny');
+            } else if(d.type === 'CHAT' && d.channel === myChannel) {
+                appendMsg(d);
             } else if(d.type === 'HISTORY') {
-                document.getElementById('msg-box').innerHTML = '';
-                d.messages.forEach(renderMsg);
+                document.getElementById('messages-container').innerHTML = '';
+                d.messages.forEach(appendMsg);
             } else if(d.type === 'VC_UPDATE') {
-                updateVCUI(d.data);
+                renderVC(d.data);
             } else if(d.type === 'VC_STATE') {
-                updateUserState(d);
+                updateVisualSpeak(d);
             }
         };
+        socket.onopen = () => socket.send(JSON.stringify({type:'LOGIN', username:myUser}));
     }
-
-    function renderChannels(chs) {
-        const cont = document.getElementById('text-channels');
-        cont.innerHTML = '';
+    function buildNav(chs) {
+        const nav = document.getElementById('text-nav'); nav.innerHTML = '';
         chs.forEach(c => {
-            const div = document.createElement('div');
-            div.className = `item ${c === currentChannel ? 'active' : ''}`;
-            div.innerText = '# ' + c;
-            div.onclick = () => switchText(c);
-            cont.appendChild(div);
+            const el = document.createElement('div');
+            el.className = `nav-item ${c === myChannel ? 'active' : ''}`;
+            el.innerText = c;
+            el.onclick = () => switchChannel(c);
+            nav.appendChild(el);
         });
     }
-
-    function switchText(c) {
-        currentChannel = c;
-        document.querySelectorAll('#text-channels .item').forEach(el => el.classList.toggle('active', el.innerText.includes(c)));
+    function switchChannel(c) {
+        myChannel = c;
+        document.getElementById('ch-name').innerText = c;
+        document.querySelectorAll('#text-nav .nav-item').forEach(el => el.classList.toggle('active', el.innerText === c));
         socket.send(JSON.stringify({type:'JOIN_CHANNEL', channel:c}));
     }
-
-    function renderMsg(m) {
-        const box = document.getElementById('msg-box');
-        const div = document.createElement('div');
-        div.className = 'msg';
-        div.innerHTML = `<div class="msg-info">${m.sender} // ${m.timestamp}</div><div>${m.content}</div>`;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
+    function appendMsg(m) {
+        const cont = document.getElementById('messages-container');
+        const div = document.createElement('div'); div.className = 'msg-block';
+        const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        div.innerHTML = `<div class="msg-meta"><strong>${m.sender}</strong> <span>${time}</span></div><div class="msg-text">${m.content}</div>`;
+        cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
     }
-
-    function sendChat() {
-        const inpt = document.getElementById('msg-in');
-        if(inpt.value) {
-            socket.send(JSON.stringify({type:'CHAT', content:inpt.value, channel:currentChannel}));
-            inpt.value = '';
+    function sendMsg() {
+        const i = document.getElementById('chat-input');
+        if(i.value) {
+            socket.send(JSON.stringify({type:'CHAT', content:i.value, channel:myChannel}));
+            i.value = '';
         }
     }
-
-    async function joinVC(name) {
-        if(currentVC === name) return;
-        currentVC = name;
-        document.getElementById('vc-controls').style.display = 'flex';
+    async function joinVoice(name) {
+        if(myVC === name) return;
+        myVC = name;
         if(!localStream) {
             localStream = await navigator.mediaDevices.getUserMedia({audio:true});
-            setupVoiceDetection();
+            startVoiceDetection();
         }
         socket.send(JSON.stringify({type:'VC_JOIN', vcName:name}));
     }
-
-    function updateVCUI(data) {
-        document.querySelectorAll('[id^="users-"]').forEach(el => el.innerHTML = '');
+    function renderVC(data) {
+        document.querySelectorAll('.vc-user-list').forEach(el => el.innerHTML = '');
         for(let vc in data) {
             const cont = document.getElementById('users-' + vc);
             if(cont) {
                 for(let sid in data[vc]) {
                     const div = document.createElement('div');
-                    div.id = 'user-' + sid;
                     div.className = 'vc-user';
-                    div.innerHTML = `<span></span> ${data[vc][sid]}`;
+                    div.dataset.name = data[vc][sid];
+                    div.innerHTML = `<div class="dot"></div> ${data[vc][sid]}`;
                     cont.appendChild(div);
                 }
             }
         }
     }
-
     function toggleMute() {
         isMuted = !isMuted;
         localStream.getAudioTracks()[0].enabled = !isMuted;
-        const btn = document.getElementById('mute-btn');
-        btn.classList.toggle('active', isMuted);
-        btn.innerText = isMuted ? 'UNMUTE_MIC' : 'MUTE_MIC';
-        socket.send(JSON.stringify({type:'VC_STATE', sid: socket.id, muted: isMuted}));
+        document.getElementById('m-btn').classList.toggle('active', isMuted);
     }
-
-    function setupVoiceDetection() {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function startVoiceDetection() {
+        audioCtx = new AudioContext();
         const source = audioCtx.createMediaStreamSource(localStream);
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 256;
-        source.connect(analyser);
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-        detectVolume();
+        analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
+        source.connect(analyser); dataArray = new Uint8Array(analyser.frequencyBinCount);
+        loop();
     }
-
-    function detectVolume() {
+    function loop() {
         analyser.getByteFrequencyData(dataArray);
-        let sum = 0;
-        for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
-        let average = sum / dataArray.length;
-        if(average > 10 && !isMuted) {
-            socket.send(JSON.stringify({type:'VC_STATE', username:currentUser, speaking:true}));
-        } else {
-            socket.send(JSON.stringify({type:'VC_STATE', username:currentUser, speaking:false}));
-        }
-        setTimeout(detectVolume, 200);
+        let vol = dataArray.reduce((a,b) => a+b) / dataArray.length;
+        socket.send(JSON.stringify({type:'VC_STATE', username:myUser, speaking: (vol > 15 && !isMuted)}));
+        setTimeout(loop, 150);
     }
-
-    function updateUserState(d) {
+    function updateVisualSpeak(d) {
         document.querySelectorAll('.vc-user').forEach(el => {
-            if(el.innerText.trim() === d.username) {
-                el.classList.toggle('speaking', d.speaking);
-            }
+            if(el.dataset.name === d.username) el.classList.toggle('speaking', d.speaking);
         });
     }
 </script>
