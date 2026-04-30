@@ -38,7 +38,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             JsonNode json = mapper.readTree(message.getPayload());
             String type = json.get("type").asText();
 
-            if ("LOGIN".equals(type)) {
+            // PING od klienta - podtrzymuje połączenie Rendera, ignorujemy go
+            if ("PING".equals(type)) {
+                return;
+            } else if ("LOGIN".equals(type)) {
                 String user = json.get("username").asText();
                 userNames.put(session.getId(), user);
                 session.sendMessage(new TextMessage("{\"type\":\"LOGIN_OK\",\"username\":\"" + user + "\",\"channels\":" + mapper.writeValueAsString(textChannels) + "}"));
