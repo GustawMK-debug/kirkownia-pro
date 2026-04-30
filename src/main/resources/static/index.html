@@ -2,68 +2,88 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Kirkownia // Aesthetic</title>
+    <title>Kirkownia // Dark</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-        :root { --bg: #fdfdfd; --sidebar: #f4f7f5; --sage: #a3b18a; --forest: #3a5a40; --text-dark: #344e41; --text-light: #8e9e94; --white: #ffffff; }
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-        #auth-overlay { position: fixed; inset: 0; z-index: 1000; background: var(--white); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1s; }
-        .auth-card { text-align: center; max-width: 320px; width: 100%; }
-        input { width: 100%; padding: 15px; border: none; border-bottom: 1px solid #e0e0e0; font-family: inherit; font-size: 1rem; margin-bottom: 30px; outline: none; background: transparent; text-align: center; }
-        .btn-minimal { background: var(--forest); color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-size: 0.9rem; transition: 0.4s; letter-spacing: 1px; }
+        :root {
+            --bg-main: #0e0e0e; --bg-panel: #161616; --bg-hover: #222222;
+            --text-main: #e0e0e0; --text-muted: #888888; --accent: #ffffff; --border: #2a2a2a;
+        }
 
-        #sidebar { width: 280px; background: var(--sidebar); display: flex; flex-direction: column; border-right: 1px solid #eeeeee; padding-top: 40px; }
-        .sidebar-title { padding: 0 30px; font-weight: 600; font-size: 0.8rem; letter-spacing: 2px; color: var(--text-light); margin-bottom: 20px; }
-        .nav-item { padding: 12px 30px; cursor: pointer; color: var(--text-light); font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
-        .nav-item.active { color: var(--forest); font-weight: 600; border-right: 3px solid var(--sage); background: rgba(163, 177, 138, 0.05); }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        .vc-user-list { padding-left: 55px; margin-bottom: 10px; font-size: 0.85rem; }
-        .vc-user { padding: 4px 0; color: var(--text-light); transition: 0.3s; display: flex; align-items: center; gap: 8px; border-radius: 6px; }
-        .vc-user.speaking { color: var(--forest); font-weight: 600; text-shadow: 0 0 8px rgba(163, 177, 138, 0.5); }
-        .dot { width: 6px; height: 6px; background: var(--sage); border-radius: 50%; opacity: 0; transition: 0.3s; }
-        .speaking .dot { opacity: 1; transform: scale(1.3); }
+        /* Ekran Logowania */
+        #auth-overlay { position: fixed; inset: 0; z-index: 1000; background: var(--bg-main); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease; }
+        .auth-card { width: 340px; padding: 40px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .auth-card h2 { font-weight: 400; letter-spacing: 3px; margin-bottom: 30px; color: var(--accent); }
+        input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1rem; margin-bottom: 25px; outline: none; background: #000; color: #fff; box-sizing: border-box; transition: 0.3s; text-align: center; }
+        input:focus { border-color: #555; }
+        .btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; letter-spacing: 1px; }
+        .btn:hover { background: #ccc; }
 
-        #main-view { flex: 1; display: flex; flex-direction: column; }
-        #chat-header { padding: 30px 40px; border-bottom: 1px solid #f0f0f0; font-weight: 600; color: var(--forest); text-transform: uppercase; letter-spacing: 1px; }
-        #messages-container { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-        .msg-block { animation: fadeIn 0.5s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .msg-meta { font-size: 0.75rem; color: var(--text-light); margin-bottom: 4px; }
+        /* Sidebar */
+        #sidebar { width: 280px; background: var(--bg-panel); display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+        .sidebar-title { padding: 30px 25px 10px; font-weight: 600; font-size: 0.75rem; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; }
 
-        #input-wrapper { padding: 30px 40px; }
-        #chat-input { width: 100%; padding: 18px 25px; border-radius: 15px; border: 1px solid #f0f0f0; outline: none; transition: 0.3s; font-family: inherit; font-size: 0.95rem; }
+        .nav-item { padding: 10px 25px; cursor: pointer; color: var(--text-muted); font-size: 0.95rem; transition: 0.2s; display: flex; align-items: center; margin: 2px 10px; border-radius: 6px; }
+        .nav-item:hover { color: var(--text-main); background: var(--bg-hover); }
+        .nav-item.active { color: var(--accent); background: var(--bg-hover); font-weight: 500; }
 
-        .user-panel { margin-top: auto; padding: 25px; background: #fff; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
-        .mute-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #eee; background: transparent; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
-        .mute-btn.active { background: #fee; border-color: #fcc; color: #f66; }
+        /* Lista VC */
+        .vc-user-list { padding-left: 45px; margin-bottom: 10px; font-size: 0.85rem; }
+        .vc-user { padding: 5px 0; color: var(--text-muted); transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .vc-user.speaking { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+        .dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; opacity: 0; transition: 0.2s; }
+        .speaking .dot { opacity: 1; transform: scale(1.2); }
+
+        /* Dolny panel użytkownika */
+        .user-panel { margin-top: auto; padding: 20px; background: var(--bg-panel); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .mute-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-main); cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
+        .mute-btn:hover { background: var(--bg-hover); }
+        .mute-btn.active { background: #3a1c1c; border-color: #ff4444; color: #ff4444; }
+
+        /* Czat */
+        #main-view { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); }
+        #chat-header { padding: 25px 30px; border-bottom: 1px solid var(--border); font-weight: 500; font-size: 1.1rem; color: var(--accent); }
+
+        #messages-container { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .msg-block { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: baseline; gap: 8px; }
+        .msg-author { color: var(--accent); font-weight: 600; font-size: 0.95rem; }
+        .msg-text { color: var(--text-main); line-height: 1.5; font-size: 0.95rem; }
+
+        #input-wrapper { padding: 20px 30px; }
+        #chat-input { width: 100%; padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); outline: none; transition: 0.2s; box-sizing: border-box; }
+        #chat-input:focus { border-color: #555; }
     </style>
 </head>
 <body>
 
 <div id="auth-overlay">
     <div class="auth-card">
-        <h2 style="font-weight:300; color:#3a5a40; letter-spacing:4px">KIRKOWNIA</h2>
-        <input type="text" id="username-in" placeholder="Jak Cię wołać?" maxlength="15">
-        <button class="btn-minimal" onclick="startSession()">WEJDŹ</button>
+        <h2>KIRKOWNIA</h2>
+        <input type="text" id="username-in" placeholder="Wpisz swój nick" maxlength="15" onkeypress="if(event.key==='Enter') startSession()">
+        <button class="btn" onclick="startSession()">WEJDŹ</button>
     </div>
 </div>
 
 <div id="sidebar">
-    <div class="sidebar-title">TEKSTOWE</div>
+    <div class="sidebar-title">Kanały Tekstowe</div>
     <div id="text-nav"></div>
 
-    <div class="sidebar-title" style="margin-top:30px">GŁOSOWE</div>
+    <div class="sidebar-title">Voice Chat</div>
     <div id="voice-nav">
-        <div class="nav-item" onclick="joinVoice('Salon')">Salon</div>
-        <div id="users-Salon" class="vc-user-list"></div>
-        <div class="nav-item" onclick="joinVoice('Czytelnia')">Czytelnia</div>
-        <div id="users-Czytelnia" class="vc-user-list"></div>
+        <div class="nav-item" onclick="joinVoice('Lobby')"># Lobby</div>
+        <div id="users-Lobby" class="vc-user-list"></div>
+        <div class="nav-item" onclick="joinVoice('Gaming')"># Gaming</div>
+        <div id="users-Gaming" class="vc-user-list"></div>
     </div>
 
-    <div class="user-panel" id="user-ctrl" style="display:none">
-        <span id="my-name" style="font-size: 0.85rem; font-weight: 600; color: var(--forest)"></span>
-        <button class="mute-btn" id="m-btn" onclick="toggleMute()">🎤</button>
+    <div class="user-panel" id="user-ctrl" style="visibility: hidden">
+        <span id="my-name" style="font-size: 0.9rem; font-weight: 500;"></span>
+        <button class="mute-btn" id="m-btn" onclick="toggleMute()" title="Wycisz mikrofon">🎤</button>
     </div>
 </div>
 
@@ -71,26 +91,36 @@
     <div id="chat-header"># <span id="ch-name">ogolny</span></div>
     <div id="messages-container"></div>
     <div id="input-wrapper">
-        <input type="text" id="chat-input" placeholder="Napisz coś..." onkeypress="if(event.key==='Enter') sendMsg()">
+        <input type="text" id="chat-input" placeholder="Napisz wiadomość..." onkeypress="if(event.key==='Enter') sendMsg()">
     </div>
 </div>
 
+<audio id="remote-audio" autoplay></audio>
+
 <script>
-    let socket, myUser, myChannel = 'ogolny', myVC = null, localStream, isMuted = false, audioCtx, analyser, dataArray;
+    let socket, myUser, myChannel = 'ogolny', myVC = null;
+    let localStream, isMuted = false, audioCtx, analyser, dataArray, pc;
+
+    // Konfiguracja WebRTC (serwery Google STUN, żeby łączyć się przez internet)
+    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
     function startSession() {
-        const name = document.getElementById('username-in').value;
+        const name = document.getElementById('username-in').value.trim();
         if(!name) return;
         myUser = name;
         document.getElementById('my-name').innerText = name;
+
         const prot = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         socket = new WebSocket(`${prot}//${window.location.host}/chat`);
+
+        socket.onopen = () => socket.send(JSON.stringify({type:'LOGIN', username:myUser}));
+
         socket.onmessage = (e) => {
             const d = JSON.parse(e.data);
             if(d.type === 'LOGIN_OK') {
                 document.getElementById('auth-overlay').style.opacity = '0';
                 setTimeout(() => document.getElementById('auth-overlay').style.display = 'none', 800);
-                document.getElementById('user-ctrl').style.display = 'flex';
+                document.getElementById('user-ctrl').style.visibility = 'visible';
                 buildNav(d.channels);
                 switchChannel('ogolny');
             } else if(d.type === 'CHAT' && d.channel === myChannel) {
@@ -102,9 +132,10 @@
                 renderVC(d.data);
             } else if(d.type === 'VC_STATE') {
                 updateVisualSpeak(d);
+            } else if(d.type === 'SIGNAL' && d.sender !== myUser) {
+                handleSignal(d);
             }
         };
-        socket.onopen = () => socket.send(JSON.stringify({type:'LOGIN', username:myUser}));
     }
 
     function buildNav(chs) {
@@ -112,7 +143,7 @@
         chs.forEach(c => {
             const el = document.createElement('div');
             el.className = `nav-item ${c === myChannel ? 'active' : ''}`;
-            el.innerText = c;
+            el.innerText = '# ' + c;
             el.onclick = () => switchChannel(c);
             nav.appendChild(el);
         });
@@ -121,7 +152,9 @@
     function switchChannel(c) {
         myChannel = c;
         document.getElementById('ch-name').innerText = c;
-        document.querySelectorAll('#text-nav .nav-item').forEach(el => el.classList.toggle('active', el.innerText === c));
+        document.querySelectorAll('#text-nav .nav-item').forEach(el => {
+            el.classList.toggle('active', el.innerText === '# ' + c);
+        });
         socket.send(JSON.stringify({type:'JOIN_CHANNEL', channel:c}));
     }
 
@@ -129,13 +162,13 @@
         const cont = document.getElementById('messages-container');
         const div = document.createElement('div'); div.className = 'msg-block';
         const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        div.innerHTML = `<div class="msg-meta"><strong>${m.sender}</strong> <span>${time}</span></div><div class="msg-text">${m.content}</div>`;
+        div.innerHTML = `<div class="msg-meta"><span class="msg-author">${m.sender}</span> <span>${time}</span></div><div class="msg-text">${m.content}</div>`;
         cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
     }
 
     function sendMsg() {
         const i = document.getElementById('chat-input');
-        if(i.value) {
+        if(i.value.trim() !== '') {
             socket.send(JSON.stringify({type:'CHAT', content:i.value, channel:myChannel}));
             i.value = '';
         }
@@ -148,9 +181,11 @@
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({audio:true});
                 startVoiceDetection();
-            } catch(e) { alert("Mikrofon jest wymagany do VC!"); return; }
+            } catch(e) { alert("Musisz zezwolić na użycie mikrofonu!"); return; }
         }
+
         socket.send(JSON.stringify({type:'VC_JOIN', vcName:name}));
+        initWebRTC(); // Inicjalizacja połączenia audio po dołączeniu!
     }
 
     function renderVC(data) {
@@ -170,14 +205,16 @@
     }
 
     function toggleMute() {
+        if(!localStream) return;
         isMuted = !isMuted;
-        if(localStream) localStream.getAudioTracks()[0].enabled = !isMuted;
-        document.getElementById('m-btn').classList.toggle('active', isMuted);
-        document.getElementById('m-btn').innerText = isMuted ? '🔇' : '🎤';
+        localStream.getAudioTracks()[0].enabled = !isMuted;
+        const btn = document.getElementById('m-btn');
+        btn.classList.toggle('active', isMuted);
+        btn.innerText = isMuted ? '🔇' : '🎤';
     }
 
     function startVoiceDetection() {
-        audioCtx = new AudioContext();
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioCtx.createMediaStreamSource(localStream);
         analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
         source.connect(analyser); dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -187,14 +224,51 @@
     function loop() {
         analyser.getByteFrequencyData(dataArray);
         let vol = dataArray.reduce((a,b) => a+b) / dataArray.length;
-        socket.send(JSON.stringify({type:'VC_STATE', username:myUser, speaking: (vol > 15 && !isMuted)}));
-        setTimeout(loop, 150);
+        socket.send(JSON.stringify({type:'VC_STATE', username:myUser, speaking: (vol > 10 && !isMuted)}));
+        setTimeout(loop, 200);
     }
 
     function updateVisualSpeak(d) {
         document.querySelectorAll('.vc-user').forEach(el => {
             if(el.dataset.name === d.username) el.classList.toggle('speaking', d.speaking);
         });
+    }
+
+    // --- LOGIKA WEBRTC (DŹWIĘK) ---
+    function initWebRTC() {
+        if (pc) pc.close();
+        pc = new RTCPeerConnection(rtcConfig);
+
+        localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+        pc.onicecandidate = e => {
+            if (e.candidate) socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, candidate:e.candidate}));
+        };
+
+        pc.ontrack = e => {
+            document.getElementById('remote-audio').srcObject = e.streams[0];
+        };
+
+        pc.createOffer().then(o => {
+            pc.setLocalDescription(o);
+            socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, offer:o}));
+        });
+    }
+
+    async function handleSignal(d) {
+        if (!pc) initWebRTC();
+        if (d.offer) {
+            await pc.setRemoteDescription(new RTCSessionDescription(d.offer));
+            const a = await pc.createAnswer();
+            await pc.setLocalDescription(a);
+            socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, answer:a}));
+        }
+        else if (d.answer) {
+            await pc.setRemoteDescription(new RTCSessionDescription(d.answer));
+        }
+        else if (d.candidate) {
+            await pc.addIceCandidate(new RTCIceCandidate(d.candidate));
+        }
     }
 </script>
 </body>

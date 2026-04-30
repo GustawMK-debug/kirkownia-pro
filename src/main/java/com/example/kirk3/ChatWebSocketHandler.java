@@ -18,7 +18,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
     private final Map<String, String> userNames = new ConcurrentHashMap<>();
     private final Map<String, String> userVoiceChannels = new ConcurrentHashMap<>();
-    private final Set<String> textChannels = new CopyOnWriteArraySet<>(Set.of("ogolny", "natura", "spokoj"));
+    private final Set<String> textChannels = new CopyOnWriteArraySet<>(Set.of("ogolny", "projekty", "off-topic"));
     private final ChatMessageRepository messageRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -48,14 +48,22 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 String channel = json.get("channel").asText();
                 ChatMessage chatMsg = new ChatMessage(user, content, channel, LocalDateTime.now());
                 messageRepository.save(chatMsg);
-                broadcast(mapper.writeValueAsString(Map.of("type","CHAT","sender",user,"content",content,"channel",channel,"timestamp",chatMsg.getTimestamp().toString())));
+                broadcast(mapper.writeValueAsString(Map.of(
+                        "type", "CHAT", "sender", user, "content", content,
+                        "channel", channel, "timestamp", chatMsg.getTimestamp().toString()
+                )));
             }
         } else if ("JOIN_CHANNEL".equals(type)) {
             String ch = json.get("channel").asText();
             var hist = messageRepository.findByChannelOrderByTimestampAsc(ch);
-            session.sendMessage(new TextMessage(mapper.writeValueAsString(Map.of("type","HISTORY","channel",ch,"messages",hist))));
+            session.sendMessage(new TextMessage(mapper.writeValueAsString(Map.of(
+                    "type", "HISTORY", "channel", ch, "messages", hist
+            ))));
         } else if ("VC_JOIN".equals(type)) {
             userVoiceChannels.put(session.getId(), json.get("vcName").asText());
+            broadcastVoiceState();
+        } else if ("VC_LEAVE".equals(type)) {
+            userVoiceChannels.remove(session.getId());
             broadcastVoiceState();
         } else if ("VC_STATE".equals(type)) {
             broadcast(message.getPayload());
@@ -68,13 +76,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         Map<String, Map<String, String>> voiceData = new ConcurrentHashMap<>();
         userVoiceChannels.forEach((sid, vc) -> {
             String name = userNames.get(sid);
-            if (name != null) voiceData.computeIfAbsent(vc, k -> new ConcurrentHashMap<>()).put(sid, name);
+            if (name != null) {
+                voiceData.computeIfAbsent(vc, k -> new ConcurrentHashMap<>()).put(sid, name);
+            }
         });
         broadcast(mapper.writeValueAsString(Map.of("type", "VC_UPDATE", "data", voiceData)));
     }
 
     private void broadcast(String msg) throws Exception {
-        for (WebSocketSession s : sessions.values()) if (s.isOpen()) s.sendMessage(new TextMessage(msg));
+        for (WebSocketSession s : sessions.values()) {
+            if (s.isOpen()) s.sendMessage(new TextMessage(msg));
+        }
     }
 
     @Override
@@ -82,6 +94,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         sessions.remove(session.getId());
         userNames.remove(session.getId());
         userVoiceChannels.remove(session.getId());
-        broadcastVoiceState();
+        broadcastVoiceState(); // To aktualizuje listę u innych, gdy ktoś zamknie kartę!
     }
 }
