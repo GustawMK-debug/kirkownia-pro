@@ -5,26 +5,20 @@
     <title>Kirkownia // Dark</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-
-        :root {
-            --bg-main: #0e0e0e; --bg-panel: #161616; --bg-hover: #222222;
-            --text-main: #e0e0e0; --text-muted: #888888; --accent: #ffffff; --border: #2a2a2a;
-        }
-
+        :root { --bg-main: #0e0e0e; --bg-panel: #161616; --bg-hover: #222222; --text-main: #e0e0e0; --text-muted: #888888; --accent: #ffffff; --border: #2a2a2a; }
         body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
         #auth-overlay { position: fixed; inset: 0; z-index: 1000; background: var(--bg-main); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease; }
         .auth-card { width: 340px; padding: 40px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .auth-card h2 { font-weight: 400; letter-spacing: 3px; margin-bottom: 30px; color: var(--accent); }
-        input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1rem; margin-bottom: 25px; outline: none; background: #000; color: #fff; box-sizing: border-box; transition: 0.3s; text-align: center; }
-        input:focus { border-color: #555; }
-        .btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; }
+        input[type="text"] { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1rem; margin-bottom: 25px; outline: none; background: #000; color: #fff; box-sizing: border-box; transition: 0.3s; text-align: center; }
+        input[type="text"]:focus { border-color: #555; }
+        .btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; letter-spacing: 1px; }
         .btn:hover:not(:disabled) { background: #ccc; }
         .btn:disabled { background: #555; cursor: not-allowed; }
 
         #sidebar { width: 280px; background: var(--bg-panel); display: flex; flex-direction: column; border-right: 1px solid var(--border); }
         .sidebar-title { padding: 30px 25px 10px; font-weight: 600; font-size: 0.75rem; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; }
-
         .nav-item { padding: 10px 25px; cursor: pointer; color: var(--text-muted); font-size: 0.95rem; transition: 0.2s; display: flex; align-items: center; margin: 2px 10px; border-radius: 6px; }
         .nav-item:hover { color: var(--text-main); background: var(--bg-hover); }
         .nav-item.active { color: var(--accent); background: var(--bg-hover); font-weight: 500; }
@@ -44,22 +38,18 @@
 
         #main-view { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); }
         #chat-header { padding: 25px 30px; border-bottom: 1px solid var(--border); font-weight: 500; font-size: 1.1rem; color: var(--accent); }
-
         #messages-container { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .msg-block { animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         .msg-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: baseline; gap: 8px; }
         .msg-author { color: var(--accent); font-weight: 600; font-size: 0.95rem; }
         .msg-text { color: var(--text-main); line-height: 1.5; font-size: 0.95rem; }
+        .chat-image { max-width: 350px; max-height: 350px; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; display: block; object-fit: contain; background: #000; cursor: zoom-in; }
 
         #input-wrapper { padding: 20px 30px; display: flex; gap: 10px; }
-        #chat-input { flex: 1; padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); outline: none; transition: 0.2s; box-sizing: border-box; margin: 0; }
-        #chat-input:focus { border-color: #555; }
+        #chat-input { flex: 1; padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); outline: none; transition: 0.2s; margin: 0; }
         .img-btn { width: 52px; background: var(--bg-panel); border: 1px solid var(--border); color: #fff; border-radius: 8px; cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
         .img-btn:hover { background: var(--bg-hover); border-color: #555; }
-
-        /* Upiększone obrazki na czacie */
-        .chat-image { max-width: 300px; max-height: 300px; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; display: block; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -75,7 +65,6 @@
 <div id="sidebar">
     <div class="sidebar-title">Kanały Tekstowe</div>
     <div id="text-nav"></div>
-
     <div class="sidebar-title">Voice Chat</div>
     <div id="voice-nav">
         <div class="nav-item" onclick="joinVoice('Lobby')"># Lobby</div>
@@ -83,12 +72,11 @@
         <div class="nav-item" onclick="joinVoice('Gaming')"># Gaming</div>
         <div id="users-Gaming" class="vc-user-list"></div>
     </div>
-
     <div class="user-panel" id="user-ctrl" style="visibility: hidden">
         <span id="my-name" style="font-size: 0.9rem; font-weight: 500;"></span>
         <div class="ctrl-btns">
             <button class="icon-btn" id="m-btn" onclick="toggleMute()" title="Wycisz mikrofon">🎤</button>
-            <button class="icon-btn leave-btn" onclick="leaveVoice()" title="Opustić Voice">❌</button>
+            <button class="icon-btn leave-btn" onclick="leaveVoice()" title="Opuść Voice">❌</button>
         </div>
     </div>
 </div>
@@ -97,18 +85,19 @@
     <div id="chat-header"># <span id="ch-name">ogolny</span></div>
     <div id="messages-container"></div>
     <div id="input-wrapper">
-        <button class="img-btn" onclick="promptImage()" title="Wyślij GIF / Obrazek">🖼️</button>
-        <input type="text" id="chat-input" placeholder="Napisz wiadomość lub wklej link do GIFa..." onkeypress="if(event.key==='Enter') sendMsg()">
+        <button class="img-btn" onclick="document.getElementById('file-input').click()" title="Wyślij z komputera">📁</button>
+        <input type="file" id="file-input" accept="image/png, image/jpeg, image/gif, image/webp" style="display: none;" onchange="uploadImage(event)">
+        <input type="text" id="chat-input" placeholder="Napisz wiadomość..." onkeypress="if(event.key==='Enter') sendMsg()">
     </div>
 </div>
 
-<audio id="remote-audio" autoplay></audio>
-
 <script>
     let socket, myUser, myChannel = 'ogolny', myVC = null;
-    let localStream, isMuted = false, audioCtx, analyser, dataArray, pc;
+    let localStream, isMuted = false, audioCtx, analyser, dataArray;
     let isConnecting = false;
 
+    // Słownik do trzymania osobnych połączeń z KAŻDYM użytkownikiem na kanale (eliminuje duchy)
+    let peerConnections = {};
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
     function startSession() {
@@ -135,6 +124,7 @@
                 setTimeout(() => document.getElementById('auth-overlay').style.display = 'none', 800);
                 buildNav(d.channels);
                 switchChannel('ogolny');
+                updateMuteBtnUI(); // Ustawienie domyślnego przycisku
             } else if(d.type === 'CHAT' && d.channel === myChannel) {
                 appendMsg(d);
             } else if(d.type === 'HISTORY') {
@@ -142,9 +132,10 @@
                 d.messages.forEach(appendMsg);
             } else if(d.type === 'VC_UPDATE') {
                 renderVC(d.data);
+                syncMeshConnections(d.data);
             } else if(d.type === 'VC_STATE') {
                 updateVisualSpeak(d);
-            } else if(d.type === 'SIGNAL' && d.sender !== myUser) {
+            } else if(d.type === 'SIGNAL') {
                 handleSignal(d);
             }
         };
@@ -170,13 +161,6 @@
         socket.send(JSON.stringify({type:'JOIN_CHANNEL', channel:c}));
     }
 
-    function promptImage() {
-        const url = prompt("Wklej link do obrazka lub GIFa (z końcówką .png, .jpg, .gif):");
-        if(url && url.trim() !== '') {
-            socket.send(JSON.stringify({type:'CHAT', content:url.trim(), channel:myChannel}));
-        }
-    }
-
     function sendMsg() {
         const i = document.getElementById('chat-input');
         if(i.value.trim() !== '') {
@@ -185,31 +169,49 @@
         }
     }
 
+    // --- WYSYŁANIE OBRAZKÓW ---
+    function uploadImage(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        if(file.size > 4 * 1024 * 1024) { // Limit 4MB
+            alert("Plik jest za duży! (Maksymalnie 4MB)");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Image = e.target.result;
+            socket.send(JSON.stringify({type:'CHAT', content: "IMG:" + base64Image, channel:myChannel}));
+        };
+        reader.readAsDataURL(file);
+        event.target.value = ''; // Reset inputu
+    }
+
     function appendMsg(m) {
         const cont = document.getElementById('messages-container');
         const div = document.createElement('div'); div.className = 'msg-block';
 
-        // Zabezpieczenie przed HTML Injection
-        let safeText = m.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-        // Magia! Automatyczna detekcja linków do obrazków i zamiana ich na <img src="...">
-        const imgRegex = /(https?:\/\/[^\s]+(?:\.jpg|\.jpeg|\.png|\.gif|\.webp)[^\s]*)/ig;
-        if(imgRegex.test(safeText)) {
-            safeText = safeText.replace(imgRegex, '<img src="$1" class="chat-image">');
+        let displayContent = "";
+        if (m.content.startsWith("IMG:data:image")) {
+            // To jest plik obrazu z komputera
+            const b64 = m.content.substring(4);
+            displayContent = `<img src="${b64}" class="chat-image" onclick="window.open(this.src)">`;
+        } else {
+            // Zwykły tekst - zabezpieczamy
+            let safeText = m.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            displayContent = safeText;
         }
 
-        div.innerHTML = `<div class="msg-meta"><span class="msg-author">${m.sender}</span> <span>${m.timestamp}</span></div><div class="msg-text">${safeText}</div>`;
+        div.innerHTML = `<div class="msg-meta"><span class="msg-author">${m.sender}</span> <span>${m.timestamp}</span></div><div class="msg-text">${displayContent}</div>`;
         cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
     }
 
-    // --- SYSTEM VOICE CHAT ---
+    // --- ZAAWANSOWANY SYSTEM GŁOSOWY (MESH WEBRTC) ---
 
     async function joinVoice(name) {
         if(myVC === name) return;
 
-        // ZABÓJCA DUCHÓW: Jeśli zmieniasz kanał, najpierw zamknij stare połączenie
         if(myVC !== null) {
-            leaveVoice(false); // wyjdź, ale nie chowaj panelu (bo zaraz wchodzisz na nowy)
+            leaveVoice(false); // Czyści stare połączenia przed wejściem do nowego kanału
         }
 
         myVC = name;
@@ -218,38 +220,33 @@
         if(!localStream) {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({audio:true});
+                localStream.getAudioTracks()[0].enabled = !isMuted; // Aplikuje zapisany stan wyciszenia
                 startVoiceDetection();
-            } catch(e) { alert("Musisz zezwolić na użycie mikrofonu!"); return; }
+            } catch(e) { alert("Musisz zezwolić na użycie mikrofonu!"); myVC = null; return; }
         }
 
         socket.send(JSON.stringify({type:'VC_JOIN', vcName:name}));
-        initWebRTC();
     }
 
     function leaveVoice(hidePanel = true) {
-        // ZABÓJCA DUCHÓW: Bezwzględne zamykanie i czyszczenie streamów
-        if (pc) {
-            pc.close();
-            pc = null;
+        // Niszczenie wszystkich połączeń głosowych!
+        for (let user in peerConnections) {
+            peerConnections[user].close();
+            let audioEl = document.getElementById('audio-' + user);
+            if(audioEl) audioEl.remove();
         }
+        peerConnections = {};
+
         if (localStream) {
             localStream.getTracks().forEach(t => t.stop());
             localStream = null;
         }
 
         myVC = null;
-        isMuted = false;
-
-        // Resetowanie UI
-        document.getElementById('m-btn').classList.remove('active');
-        document.getElementById('m-btn').innerText = '🎤';
-        document.getElementById('remote-audio').srcObject = null;
 
         if(hidePanel) {
             document.getElementById('user-ctrl').style.visibility = 'hidden';
         }
-
-        // Poinformuj serwer, że wyszedłeś, żeby inni przestali Cię widzieć i słyszeć
         socket.send(JSON.stringify({type:'VC_LEAVE'}));
     }
 
@@ -270,9 +267,14 @@
     }
 
     function toggleMute() {
-        if(!localStream) return;
-        isMuted = !isMuted;
-        localStream.getAudioTracks()[0].enabled = !isMuted;
+        isMuted = !isMuted; // Zapisuje się permanentnie
+        if(localStream) {
+            localStream.getAudioTracks()[0].enabled = !isMuted;
+        }
+        updateMuteBtnUI();
+    }
+
+    function updateMuteBtnUI() {
         const btn = document.getElementById('m-btn');
         btn.classList.toggle('active', isMuted);
         btn.innerText = isMuted ? '🔇' : '🎤';
@@ -285,11 +287,11 @@
             analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
             source.connect(analyser); dataArray = new Uint8Array(analyser.frequencyBinCount);
             loop();
-        } catch(e) { console.error("AudioContext error", e); }
+        } catch(e) {}
     }
 
     function loop() {
-        if(!localStream) return; // Zabezpieczenie przed pętlą po wyjściu z kanału
+        if(!localStream) return;
         analyser.getByteFrequencyData(dataArray);
         let vol = dataArray.reduce((a,b) => a+b) / dataArray.length;
         socket.send(JSON.stringify({type:'VC_STATE', username:myUser, speaking: (vol > 10 && !isMuted)}));
@@ -302,40 +304,80 @@
         });
     }
 
-    function initWebRTC() {
-        try {
-            if (pc) pc.close();
-            pc = new RTCPeerConnection(rtcConfig);
+    // Tworzy osobne połączenie dla kogoś w kanale
+    function syncMeshConnections(allVoiceData) {
+        if(!myVC || !allVoiceData[myVC]) return;
 
-            localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+        let usersInMyRoom = Object.values(allVoiceData[myVC]);
 
-            pc.onicecandidate = e => {
-                if (e.candidate) socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, candidate:e.candidate}));
-            };
+        // Zamykaj osoby, które wyszły z mojego kanału
+        for(let user in peerConnections) {
+            if(!usersInMyRoom.includes(user)) {
+                peerConnections[user].close();
+                delete peerConnections[user];
+                let a = document.getElementById('audio-' + user);
+                if(a) a.remove();
+            }
+        }
 
-            pc.ontrack = e => {
-                document.getElementById('remote-audio').srcObject = e.streams[0];
-            };
+        // Podłączaj nowych
+        usersInMyRoom.forEach(user => {
+            if(user !== myUser && !peerConnections[user]) {
+                createPeer(user);
+                // Żeby uniknąć podwójnego łączenia, "mniejszy" nick dzwoni pierwszy
+                if(myUser < user) {
+                    let pc = peerConnections[user];
+                    pc.createOffer().then(o => {
+                        pc.setLocalDescription(o);
+                        socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, target:user, offer:o}));
+                    });
+                }
+            }
+        });
+    }
 
-            pc.createOffer().then(o => {
-                pc.setLocalDescription(o);
-                socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, offer:o}));
-            });
-        } catch(e) { console.error("WebRTC Error", e); }
+    function createPeer(targetUser) {
+        let pc = new RTCPeerConnection(rtcConfig);
+        peerConnections[targetUser] = pc;
+
+        if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+        pc.onicecandidate = e => {
+            if(e.candidate) socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, target:targetUser, candidate:e.candidate}));
+        };
+
+        pc.ontrack = e => {
+            let audioEl = document.getElementById('audio-' + targetUser);
+            if(!audioEl) {
+                audioEl = document.createElement('audio');
+                audioEl.id = 'audio-' + targetUser;
+                audioEl.autoplay = true;
+                document.body.appendChild(audioEl);
+            }
+            audioEl.srcObject = e.streams[0];
+        };
     }
 
     async function handleSignal(d) {
+        if(d.target !== myUser) return; // To nie do mnie! Blokuje duchy z innych kanałów
+
+        let targetUser = d.sender;
+        if(!peerConnections[targetUser]) {
+            createPeer(targetUser);
+        }
+
+        let pc = peerConnections[targetUser];
+
         try {
-            if (!pc) initWebRTC();
             if (d.offer) {
                 await pc.setRemoteDescription(new RTCSessionDescription(d.offer));
                 const a = await pc.createAnswer();
                 await pc.setLocalDescription(a);
-                socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, answer:a}));
+                socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, target:targetUser, answer:a}));
             }
             else if (d.answer) { await pc.setRemoteDescription(new RTCSessionDescription(d.answer)); }
             else if (d.candidate) { await pc.addIceCandidate(new RTCIceCandidate(d.candidate)); }
-        } catch(e) { console.error("Signal Error", e); }
+        } catch(e) { console.log(e); }
     }
 </script>
 </body>

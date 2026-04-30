@@ -48,8 +48,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 if (user != null) {
                     String content = json.get("content").asText();
                     String channel = json.get("channel").asText();
-
-                    // Bezpieczny czas jako String
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
                     String timeStr = LocalDateTime.now().format(formatter);
 
@@ -73,9 +71,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             } else if ("VC_LEAVE".equals(type)) {
                 userVoiceChannels.remove(session.getId());
                 broadcastVoiceState();
-            } else if ("VC_STATE".equals(type)) {
-                broadcast(message.getPayload());
-            } else if ("SIGNAL".equals(type)) {
+            } else if ("VC_STATE".equals(type) || "SIGNAL".equals(type)) {
                 broadcast(message.getPayload());
             }
         } catch (Exception e) {
