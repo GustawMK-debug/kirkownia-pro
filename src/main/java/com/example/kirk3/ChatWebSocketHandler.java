@@ -2,8 +2,6 @@ package com.example.kirk3;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -11,7 +9,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -19,16 +16,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final Set<String> channels = new CopyOnWriteArraySet<>(Set.of("portal-glowny", "czarna-dziura", "neon-city"));
-    private final UserRepository userRepository;
+    private final Map<String, String> userNames = new ConcurrentHashMap<>();
+    private final Map<String, String> userVoiceChannels = new ConcurrentHashMap<>();
+    private final Set<String> textChannels = new CopyOnWriteArraySet<>(Set.of("ogolny", "strefa-gier", "projekty"));
     private final ChatMessageRepository messageRepository;
-    private final JavaMailSender mailSender;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public ChatWebSocketHandler(UserRepository userRepository, ChatMessageRepository messageRepository, JavaMailSender mailSender) {
-        this.userRepository = userRepository;
+    public ChatWebSocketHandler(ChatMessageRepository messageRepository) {
         this.messageRepository = messageRepository;
-        this.mailSender = mailSender;
     }
 
     @Override
@@ -41,58 +36,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         JsonNode json = mapper.readTree(message.getPayload());
         String type = json.get("type").asText();
 
-        if ("REGISTER".equals(type)) {
-            String email = json.get("email").asText();
+        if ("LOGIN".equals(type)) {
             String user = json.get("username").asText();
-            String pass = json.get("password").asText();
-
-            if (userRepository.findByUsername(user).isPresent()) {
-                session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"TOŻSAMOŚĆ JUŻ ISTNIEJE!\"}"));
-            } else {
-                String code = String.format("%06d", new Random().nextInt(999999));
-                UserAccount account = new UserAccount(email, user, pass, code);
-                userRepository.save(account);
-
-                // TA LINIA POZWOLI CI ODCZYTAĆ KOD W LOGACH RENDERA:
-                System.out.println("\n*****************************************");
-                System.out.println(">>> KOD WERYFIKACYJNY DLA " + user + ": " + code);
-                System.out.println("*****************************************\n");
-
-                new Thread(() -> sendEmail(email, code)).start();
-                session.sendMessage(new TextMessage("{\"type\":\"NEED_VERIFY\",\"username\":\"" + user + "\"}"));
-            }
-        } else if ("VERIFY".equals(type)) {
-            String user = json.get("username").asText();
-            String code = json.get("code").asText();
-            userRepository.findByUsername(user).ifPresent(u -> {
-                try {
-                    if (u.getVerificationCode().equals(code)) {
-                        u.setVerified(true);
-                        userRepository.save(u);
-                        session.sendMessage(new TextMessage("{\"type\":\"REGISTER_OK\"}"));
-                    } else {
-                        session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"KOD BŁĘDNY!\"}"));
-                    }
-                } catch (Exception e) {}
-            });
-        } else if ("LOGIN".equals(type)) {
-            String user = json.get("username").asText();
-            String pass = json.get("password").asText();
-            userRepository.findByUsername(user).filter(u -> u.getPasswordHash().equals(pass)).ifPresentOrElse(
-                    u -> {
-                        try {
-                            if (!u.isVerified()) {
-                                session.sendMessage(new TextMessage("{\"type\":\"NEED_VERIFY\",\"username\":\"" + user + "\"}"));
-                                return;
-                            }
-                            session.getAttributes().put("user", user);
-                            session.sendMessage(new TextMessage("{\"type\":\"LOGIN_OK\",\"username\":\"" + user + "\",\"channels\":" + mapper.writeValueAsString(channels) + "}"));
-                        } catch (Exception e) {}
-                    },
-                    () -> { try { session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"AUTORYZACJA ODRZUCONA!\"}")); } catch (Exception e) {} }
-            );
+            userNames.put(session.getId(), user);
+            session.sendMessage(new TextMessage("{\"type\":\"LOGIN_OK\",\"username\":\"" + user + "\",\"channels\":" + mapper.writeValueAsString(textChannels) + "}"));
+            broadcastVoiceState();
         } else if ("CHAT".equals(type)) {
-            String user = (String) session.getAttributes().get("user");
+            String user = userNames.get(session.getId());
             if (user != null) {
                 String content = json.get("content").asText();
                 String channel = json.get("channel").asText();
@@ -104,33 +54,37 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             String ch = json.get("channel").asText();
             var hist = messageRepository.findByChannelOrderByTimestampAsc(ch);
             session.sendMessage(new TextMessage(mapper.writeValueAsString(Map.of("type","HISTORY","channel",ch,"messages",hist))));
-        } else if ("CREATE_CHANNEL".equals(type)) {
-            String name = json.get("name").asText().toLowerCase().replaceAll("\\s+", "-");
-            channels.add(name);
-            broadcast("{\"type\":\"CHANNELS_UPDATE\",\"channels\":" + mapper.writeValueAsString(channels) + "}");
+        } else if ("VC_JOIN".equals(type)) {
+            String vcName = json.get("vcName").asText();
+            userVoiceChannels.put(session.getId(), vcName);
+            broadcastVoiceState();
+        } else if ("VC_STATE".equals(type)) {
+            broadcast(message.getPayload());
         } else if ("SIGNAL".equals(type)) {
             broadcast(message.getPayload());
         }
+    }
+
+    private void broadcastVoiceState() throws Exception {
+        Map<String, Map<String, String>> voiceData = new ConcurrentHashMap<>();
+        userVoiceChannels.forEach((sid, vc) -> {
+            String name = userNames.get(sid);
+            if (name != null) {
+                voiceData.computeIfAbsent(vc, k -> new ConcurrentHashMap<>()).put(sid, name);
+            }
+        });
+        broadcast(mapper.writeValueAsString(Map.of("type", "VC_UPDATE", "data", voiceData)));
     }
 
     private void broadcast(String msg) throws Exception {
         for (WebSocketSession s : sessions.values()) if (s.isOpen()) s.sendMessage(new TextMessage(msg));
     }
 
-    private void sendEmail(String to, String code) {
-        try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(to);
-            msg.setSubject("AUTORYZACJA KIRKOWNIA");
-            msg.setText("Klucz dostępu: " + code);
-            mailSender.send(msg);
-        } catch (Exception e) {
-            System.err.println("Email Error (Ignoruj jeśli czytasz logi): " + e.getMessage());
-        }
-    }
-
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         sessions.remove(session.getId());
+        userNames.remove(session.getId());
+        userVoiceChannels.remove(session.getId());
+        broadcastVoiceState();
     }
 }

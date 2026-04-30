@@ -2,225 +2,205 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>KIRKOWNIA PRO | V3</title>
+    <title>NEXUS PROTOCOL // V4</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
-
-        :root { --neon-blue: #00d2ff; --neon-purple: #9d00ff; --neon-pink: #ff007a; --dark-void: #020205; }
-
-        body { margin: 0; background: var(--dark-void); color: white; font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; display: flex; }
-
-        /* Animowane tło - Moving Nebula */
-        body::before {
-            content: ""; position: fixed; inset: 0; z-index: -1;
-            background: linear-gradient(45deg, #050510, #10002b, #050510);
-            background-size: 400% 400%; animation: nebulaMove 15s ease infinite;
-        }
-        @keyframes nebulaMove { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-
-        #auth-container { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; transition: 1.2s cubic-bezier(0.8, 0, 0.2, 1); }
-
-        .auth-box {
-            background: rgba(255, 255, 255, 0.03); border: 2px solid var(--neon-blue);
-            padding: 50px; border-radius: 40px; width: 450px; text-align: center;
-            backdrop-filter: blur(20px); box-shadow: 0 0 40px rgba(0, 210, 255, 0.3);
-            position: relative; overflow: hidden;
-        }
-
-        .auth-box::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, var(--neon-blue), transparent 30%); animation: rotateBorder 4s linear infinite; z-index: -1; }
-        @keyframes rotateBorder { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .auth-inner { background: var(--dark-void); border-radius: 35px; padding: 20px; }
-
-        h1 { font-family: 'Syncopate', sans-serif; font-size: 2rem; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); margin-bottom: 40px; }
-
-        input {
-            width: 100%; padding: 15px; margin-bottom: 25px; border-radius: 15px; border: 1px solid #333;
-            background: rgba(255,255,255,0.05); color: var(--neon-blue); font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.3s;
-        }
-        input:focus { border-color: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
-
-        button {
-            width: 100%; padding: 18px; border-radius: 15px; border: none; background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-            color: white; font-family: 'Syncopate', sans-serif; font-weight: bold; cursor: pointer; transition: 0.4s; letter-spacing: 2px;
-        }
-        button:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--neon-purple); filter: brightness(1.2); }
-
-        #sidebar { width: 320px; background: rgba(0,0,0,0.7); border-right: 1px solid rgba(0, 210, 255, 0.2); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 40px 20px; text-align: center; font-family: 'Syncopate', sans-serif; color: var(--neon-pink); border-bottom: 1px solid #222; }
-
-        .channel {
-            padding: 15px 30px; margin: 8px 15px; cursor: pointer; border-radius: 20px;
-            transition: 0.3s; color: #666; font-weight: bold; letter-spacing: 1px;
-        }
-        .channel:hover { color: white; background: rgba(255,255,255,0.05); }
-        .channel.active { background: rgba(255, 0, 122, 0.2); color: var(--neon-pink); border: 1px solid var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 122, 0.2); }
-
-        #chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
-        #messages { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; }
-
-        .message {
-            background: rgba(255,255,255,0.02); padding: 25px; border-radius: 30px 30px 30px 5px;
-            border: 1px solid rgba(255,255,255,0.05); animation: messageAppear 0.5s ease-out forwards;
-        }
-        @keyframes messageAppear { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-        .msg-user { color: var(--neon-blue); font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; display: block; }
-
-        #input-area { padding: 40px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
-        #msg-input {
-            width: 100%; padding: 20px; border-radius: 25px; border: 1px solid #333;
-            background: #000; color: white; font-family: inherit; font-size: 1.1rem; box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        /* Voice Status Indicator */
-        .vc-card { background: rgba(0, 255, 122, 0.05); border: 1px solid #00ff7a; padding: 15px; margin: 20px; border-radius: 20px; text-align: center; }
-        .pulse-red { width: 10px; height: 10px; background: red; border-radius: 50%; display: inline-block; margin-right: 10px; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        :root { --neon: #00f2ff; --bg: #050a0f; --panel: rgba(10, 25, 41, 0.8); --accent: #ff0077; }
+        body { margin: 0; background: var(--bg); color: var(--neon); font-family: 'Share Tech Mono', monospace; height: 100vh; display: flex; overflow: hidden; }
+        body::after { content: ""; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px); pointer-events: none; }
+        #auth-overlay { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; justify-content: center; align-items: center; transition: 1s; }
+        .nexus-box { padding: 40px; border: 1px solid var(--neon); background: var(--panel); box-shadow: 0 0 20px var(--neon); text-align: center; width: 400px; }
+        input { background: #000; border: 1px solid var(--neon); color: var(--neon); padding: 12px; width: 100%; box-sizing: border-box; margin-bottom: 20px; outline: none; }
+        button { background: var(--neon); border: none; color: #000; padding: 12px 25px; cursor: pointer; font-family: inherit; font-weight: bold; width: 100%; transition: 0.3s; }
+        button:hover { background: #fff; box-shadow: 0 0 15px #fff; }
+        #sidebar { width: 300px; border-right: 1px solid var(--neon); display: flex; flex-direction: column; background: rgba(0,0,0,0.4); }
+        .section-label { padding: 10px 20px; background: rgba(0, 242, 255, 0.1); font-size: 0.8rem; border-bottom: 1px solid var(--neon); margin-top: 10px; }
+        .item { padding: 12px 25px; cursor: pointer; transition: 0.2s; opacity: 0.7; }
+        .item:hover { opacity: 1; background: rgba(0, 242, 255, 0.05); }
+        .item.active { opacity: 1; color: #fff; border-left: 3px solid var(--neon); background: linear-gradient(90deg, rgba(0, 242, 255, 0.1), transparent); }
+        .vc-user { padding: 5px 40px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .vc-user.speaking { color: #00ff88; text-shadow: 0 0 10px #00ff88; transform: scale(1.05); }
+        .vc-user.muted { color: var(--accent); opacity: 0.5; }
+        #chat-main { flex: 1; display: flex; flex-direction: column; }
+        #msg-box { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .msg { padding: 15px; border-left: 2px solid var(--neon); background: rgba(0, 242, 255, 0.02); animation: slide 0.3s ease-out; }
+        @keyframes slide { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        .msg-info { font-size: 0.7rem; margin-bottom: 5px; opacity: 0.6; }
+        #input-area { padding: 25px; border-top: 1px solid var(--neon); }
+        .controls { padding: 15px; border-top: 1px solid var(--neon); display: flex; gap: 10px; }
+        .btn-mute { background: var(--accent); color: #fff; flex: 1; }
+        .btn-mute.active { background: #333; }
     </style>
 </head>
 <body>
 
-<div id="auth-container">
-    <div class="auth-box">
-        <div class="auth-inner">
-            <div id="login-box">
-                <h1>IDENTYFIKACJA</h1>
-                <input type="text" id="login-username" placeholder="NICKNAME">
-                <input type="password" id="login-password" placeholder="PASSWORD">
-                <button onclick="login()">WEJDŹ DO SIECI</button>
-                <p style="margin-top:20px; color:#444; font-size:0.8rem; cursor:pointer" onclick="toggleAuth()">BRAK UPRAWNIEŃ? UTWÓRZ PROFIL</p>
-            </div>
-            <div id="register-box" style="display:none">
-                <h1>REJESTRACJA</h1>
-                <input type="email" id="reg-email" placeholder="EMAIL">
-                <input type="text" id="reg-username" placeholder="NICKNAME">
-                <input type="password" id="reg-password" placeholder="PASSWORD">
-                <button onclick="register()">GENERUJ DOSTĘP</button>
-                <p style="margin-top:20px; color:#444; font-size:0.8rem; cursor:pointer" onclick="toggleAuth()">POWRÓT DO LOGOWANIA</p>
-            </div>
-            <div id="verify-box" style="display:none">
-                <h1>WERYFIKACJA</h1>
-                <p style="color:var(--neon-pink)">WPISZ KLUCZ PRZESŁANY PRZEZ SATELITĘ</p>
-                <input type="text" id="verify-code" placeholder="KOD 6-CYFR">
-                <button onclick="verify()">POTWIERDŹ TOŻSAMOŚĆ</button>
-            </div>
-        </div>
+<div id="auth-overlay">
+    <div class="nexus-box">
+        <h2 style="margin-top:0">// NEXUS ACCESS</h2>
+        <input type="text" id="nick" placeholder="WPISZ KOD IDENTYFIKACYJNY (NICK)">
+        <button onclick="access()">AUTORYZUJ WEJŚCIE</button>
     </div>
 </div>
 
 <div id="sidebar">
-    <div class="sidebar-header">KIRKOWNIA PRO</div>
-    <div id="channels-list"></div>
-    <div id="vc-ui" style="display:none" class="vc-card">
-        <div style="color:#00ff7a; font-weight:bold"><span class="pulse-red"></span>VOICE ACTIVE</div>
-        <button onclick="location.reload()" style="background:red; padding:5px; margin-top:10px; font-size:0.7rem">ROZŁĄCZ</button>
+    <div style="padding:20px; font-size:1.2rem; font-weight:bold; border-bottom: 1px solid var(--neon)">KIRKOWNIA_OS v4.0</div>
+    <div class="section-label">TEKST_PROTOCOLS</div>
+    <div id="text-channels"></div>
+    <div class="section-label">VOICE_NODES</div>
+    <div id="voice-channels">
+        <div class="item" onclick="joinVC('General-Comms')"># General-Comms</div>
+        <div id="users-General-Comms"></div>
+        <div class="item" onclick="joinVC('Tactical-Channel')"># Tactical-Channel</div>
+        <div id="users-Tactical-Channel"></div>
     </div>
-    <button id="vc-btn" onclick="toggleVC()" style="margin:20px; background:transparent; border:1px solid #00ff7a; color:#00ff7a">POŁĄCZ GŁOSOWO</button>
+    <div class="controls" id="vc-controls" style="display:none">
+        <button class="btn-mute" id="mute-btn" onclick="toggleMute()">MUTE_MIC</button>
+    </div>
 </div>
 
-<div id="chat-area">
-    <div id="messages"></div>
-    <div id="input-area"><input type="text" id="msg-input" placeholder="NADAJ WIADOMOŚĆ..." onkeypress="if(event.key==='Enter') sendMessage()"></div>
+<div id="chat-main">
+    <div id="msg-box"></div>
+    <div id="input-area">
+        <input type="text" id="msg-in" placeholder="NADAJ WIADOMOŚĆ..." onkeypress="if(event.key==='Enter') sendChat()">
+    </div>
 </div>
 
 <script>
-    let socket, currentUser, currentChannel = 'portal-glowny', userToVerify, pc, localStream;
-    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    let socket, currentUser, currentChannel = 'ogolny', currentVC = null;
+    let localStream, isMuted = false, audioCtx, analyser, dataArray;
+
+    function access() {
+        const nick = document.getElementById('nick').value;
+        if(nick) {
+            currentUser = nick;
+            connect();
+        }
+    }
 
     function connect() {
         const prot = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         socket = new WebSocket(`${prot}//${window.location.host}/chat`);
-        socket.onmessage = async (e) => {
+        socket.onopen = () => socket.send(JSON.stringify({type:'LOGIN', username:currentUser}));
+        socket.onmessage = (e) => {
             const d = JSON.parse(e.data);
-            if (d.type === 'LOGIN_OK') {
-                currentUser = d.username;
-                document.getElementById('auth-container').style.opacity = '0';
-                setTimeout(() => document.getElementById('auth-container').style.display = 'none', 1200);
-                updateChannels(d.channels);
-                switchChannel('portal-glowny');
-            } else if (d.type === 'NEED_VERIFY') {
-                userToVerify = d.username;
-                document.getElementById('login-box').style.display = 'none';
-                document.getElementById('register-box').style.display = 'none';
-                document.getElementById('verify-box').style.display = 'block';
-            } else if (d.type === 'REGISTER_OK') { alert("Dostęp przyznany! Zaloguj się."); location.reload(); }
-            else if (d.type === 'CHAT' && d.channel === currentChannel) displayMsg(d);
-            else if (d.type === 'HISTORY') { document.getElementById('messages').innerHTML = ''; d.messages.forEach(displayMsg); }
-            else if (d.type === 'CHANNELS_UPDATE') updateChannels(d.channels);
-            else if (d.type === 'SIGNAL' && d.sender !== currentUser) handleSignal(d);
-            else if (d.type === 'ERROR') alert(d.message);
+            if(d.type === 'LOGIN_OK') {
+                document.getElementById('auth-overlay').style.transform = 'translateY(-100%)';
+                renderChannels(d.channels);
+                switchText('ogolny');
+            } else if(d.type === 'CHAT' && d.channel === currentChannel) {
+                renderMsg(d);
+            } else if(d.type === 'HISTORY') {
+                document.getElementById('msg-box').innerHTML = '';
+                d.messages.forEach(renderMsg);
+            } else if(d.type === 'VC_UPDATE') {
+                updateVCUI(d.data);
+            } else if(d.type === 'VC_STATE') {
+                updateUserState(d);
+            }
         };
-        socket.onclose = () => setTimeout(connect, 2000);
     }
 
-    function toggleAuth() {
-        const l = document.getElementById('login-box'), r = document.getElementById('register-box');
-        l.style.display = l.style.display === 'none' ? 'block' : 'none';
-        r.style.display = r.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function login() { socket.send(JSON.stringify({type:'LOGIN', username:document.getElementById('login-username').value, password:document.getElementById('login-password').value})); }
-    function register() { socket.send(JSON.stringify({type:'REGISTER', email:document.getElementById('reg-email').value, username:document.getElementById('reg-username').value, password:document.getElementById('reg-password').value})); }
-    function verify() { socket.send(JSON.stringify({type:'VERIFY', username:userToVerify, code:document.getElementById('verify-code').value})); }
-
-    function updateChannels(chs) {
-        const l = document.getElementById('channels-list'); l.innerHTML = '';
-        chs.sort().forEach(ch => {
+    function renderChannels(chs) {
+        const cont = document.getElementById('text-channels');
+        cont.innerHTML = '';
+        chs.forEach(c => {
             const div = document.createElement('div');
-            div.className = `channel ${ch === currentChannel ? 'active' : ''}`;
-            div.innerText = ch.toUpperCase();
-            div.onclick = () => switchChannel(ch);
-            l.appendChild(div);
+            div.className = `item ${c === currentChannel ? 'active' : ''}`;
+            div.innerText = '# ' + c;
+            div.onclick = () => switchText(c);
+            cont.appendChild(div);
         });
     }
 
-    function switchChannel(ch) {
-        currentChannel = ch;
-        socket.send(JSON.stringify({type:'JOIN_CHANNEL', channel:ch}));
-        document.querySelectorAll('.channel').forEach(el => el.classList.toggle('active', el.innerText === ch.toUpperCase()));
+    function switchText(c) {
+        currentChannel = c;
+        document.querySelectorAll('#text-channels .item').forEach(el => el.classList.toggle('active', el.innerText.includes(c)));
+        socket.send(JSON.stringify({type:'JOIN_CHANNEL', channel:c}));
     }
 
-    function sendMessage() {
-        const i = document.getElementById('msg-input');
-        if (i.value.trim() && currentUser) {
-            socket.send(JSON.stringify({type:'CHAT', content:i.value, channel:currentChannel}));
-            i.value = '';
+    function renderMsg(m) {
+        const box = document.getElementById('msg-box');
+        const div = document.createElement('div');
+        div.className = 'msg';
+        div.innerHTML = `<div class="msg-info">${m.sender} // ${m.timestamp}</div><div>${m.content}</div>`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function sendChat() {
+        const inpt = document.getElementById('msg-in');
+        if(inpt.value) {
+            socket.send(JSON.stringify({type:'CHAT', content:inpt.value, channel:currentChannel}));
+            inpt.value = '';
         }
     }
 
-    function displayMsg(m) {
-        const c = document.getElementById('messages'), div = document.createElement('div');
-        div.className = 'message';
-        const t = new Date(m.timestamp).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'});
-        div.innerHTML = `<span class="msg-user">${m.sender} // ${t}</span><div style="color:#dcddde; line-height:1.6">${m.content}</div>`;
-        c.appendChild(div); c.scrollTop = c.scrollHeight;
+    async function joinVC(name) {
+        if(currentVC === name) return;
+        currentVC = name;
+        document.getElementById('vc-controls').style.display = 'flex';
+        if(!localStream) {
+            localStream = await navigator.mediaDevices.getUserMedia({audio:true});
+            setupVoiceDetection();
+        }
+        socket.send(JSON.stringify({type:'VC_JOIN', vcName:name}));
     }
 
-    async function toggleVC() {
-        try {
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            document.getElementById('vc-ui').style.display = 'block';
-            document.getElementById('vc-btn').style.display = 'none';
-            initWebRTC();
-        } catch (err) { alert("Mikrofon zablokowany!"); }
+    function updateVCUI(data) {
+        document.querySelectorAll('[id^="users-"]').forEach(el => el.innerHTML = '');
+        for(let vc in data) {
+            const cont = document.getElementById('users-' + vc);
+            if(cont) {
+                for(let sid in data[vc]) {
+                    const div = document.createElement('div');
+                    div.id = 'user-' + sid;
+                    div.className = 'vc-user';
+                    div.innerHTML = `<span></span> ${data[vc][sid]}`;
+                    cont.appendChild(div);
+                }
+            }
+        }
     }
 
-    function initWebRTC() {
-        pc = new RTCPeerConnection(rtcConfig);
-        localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-        pc.onicecandidate = e => e.candidate && socket.send(JSON.stringify({type:'SIGNAL', sender:currentUser, candidate:e.candidate}));
-        pc.ontrack = e => { const a = new Audio(); a.srcObject = e.streams[0]; a.play(); };
-        pc.createOffer().then(o => { pc.setLocalDescription(o); socket.send(JSON.stringify({type:'SIGNAL', sender:currentUser, offer:o})); });
+    function toggleMute() {
+        isMuted = !isMuted;
+        localStream.getAudioTracks()[0].enabled = !isMuted;
+        const btn = document.getElementById('mute-btn');
+        btn.classList.toggle('active', isMuted);
+        btn.innerText = isMuted ? 'UNMUTE_MIC' : 'MUTE_MIC';
+        socket.send(JSON.stringify({type:'VC_STATE', sid: socket.id, muted: isMuted}));
     }
 
-    async function handleSignal(d) {
-        if (!pc) initWebRTC();
-        if (d.offer) { await pc.setRemoteDescription(new RTCSessionDescription(d.offer)); const a = await pc.createAnswer(); await pc.setLocalDescription(a); socket.send(JSON.stringify({type:'SIGNAL', sender:currentUser, answer:a})); }
-        else if (d.answer) { await pc.setRemoteDescription(new RTCSessionDescription(d.answer)); }
-        else if (d.candidate) { await pc.addIceCandidate(new RTCIceCandidate(d.candidate)); }
+    function setupVoiceDetection() {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(localStream);
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        detectVolume();
     }
 
-    connect();
+    function detectVolume() {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+        let average = sum / dataArray.length;
+        if(average > 10 && !isMuted) {
+            socket.send(JSON.stringify({type:'VC_STATE', username:currentUser, speaking:true}));
+        } else {
+            socket.send(JSON.stringify({type:'VC_STATE', username:currentUser, speaking:false}));
+        }
+        setTimeout(detectVolume, 200);
+    }
+
+    function updateUserState(d) {
+        document.querySelectorAll('.vc-user').forEach(el => {
+            if(el.innerText.trim() === d.username) {
+                el.classList.toggle('speaking', d.speaking);
+            }
+        });
+    }
 </script>
 </body>
 </html>
