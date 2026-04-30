@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Kirkownia PRO</title>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <style>
+        :root { --bg-deep: #0a0f0a; --bg-panel: #141d14; --bg-widgets: #1b291b; --bg-input: #253825; --text-main: #b0c0b0; --text-bright: #ffffff; --acc-green: #3ba55c; --acc-red: #cf6679; --acc-user: #81c784; }
+        body { background-color: var(--bg-deep); color: var(--text-main); font-family: 'Consolas', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        #header { background-color: var(--bg-widgets); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bg-input); }
+        #main-container { display: flex; flex: 1; overflow: hidden; }
+        #sidebar { width: 240px; background-color: var(--bg-widgets); border-right: 1px solid var(--bg-input); padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .section-title { font-weight: bold; font-size: 0.7em; opacity: 0.5; text-transform: uppercase; }
+        .channel-link { cursor: pointer; padding: 10px; border-radius: 4px; font-size: 0.9em; color: #888; }
+        .channel-active { background: var(--bg-input); color: var(--acc-green); font-weight: bold; }
+        .user-item { font-size: 0.85em; color: var(--acc-user); padding: 5px 10px; border-radius: 4px; transition: 0.3s; }
+        .user-chan { font-size: 0.7em; opacity: 0.3; float: right; }
+        .is-talking { color: #fff !important; text-shadow: 0 0 10px var(--acc-green); background: rgba(59, 165, 92, 0.2); border-left: 3px solid var(--acc-green); }
+        #chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-panel); }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg-container { background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 4px; width: fit-content; max-width: 85%; border-left: 2px solid var(--bg-input); }
+        .msg-time { font-size: 0.7em; opacity: 0.4; margin-left: 10px; }
+        .msg-system { background: transparent; padding: 4px 12px; border-left: 2px solid #555; color: #777; font-size: 0.85em; font-style: italic; }
+        #input-area { background-color: var(--bg-widgets); padding: 20px; display: flex; gap: 10px; }
+        input { background-color: var(--bg-input); border: none; padding: 12px; color: white; border-radius: 4px; outline: none; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        .chat-input { flex: 1; margin-bottom: 0; }
+        .btn { color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-switch { background: transparent; color: var(--acc-green); text-decoration: underline; cursor: pointer; border: none; font-size: 0.8em; margin-top: 15px; width: 100%; }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .auth-box { background: var(--bg-panel); padding: 40px; border-radius: 8px; border: 1px solid var(--acc-green); width: 300px; }
+    </style>
+</head>
+<body>
+<div id="login-overlay">
+    <div id="loginBox" class="auth-box">
+        <h2>AUTORYZACJA</h2>
+        <div id="errorMsg" style="color: var(--acc-red); text-align: center; margin-bottom: 10px;"></div>
+        <input type="email" id="loginEmail" placeholder="E-mail">
+        <input type="password" id="loginPassword" placeholder="Hasło" onkeypress="if(event.key==='Enter') doLogin()">
+        <button class="btn" style="background: var(--acc-green); width: 100%;" onclick="doLogin()">ZALOGUJ</button>
+        <button class="btn-switch" onclick="switchAuth('register')">Rejestracja</button>
+    </div>
+    <div id="registerBox" class="auth-box" style="display: none;">
+        <h2>REJESTRACJA</h2>
+        <div id="regErrorMsg" style="color: var(--acc-red); text-align: center; margin-bottom: 10px;"></div>
+        <input type="email" id="regEmail" placeholder="E-mail">
+        <input type="text" id="regNick" placeholder="Nick">
+        <input type="password" id="regPassword" placeholder="Hasło" onkeypress="if(event.key==='Enter') doRegister()">
+        <button class="btn" style="background: var(--acc-green); width: 100%;" onclick="doRegister()">UTWÓRZ</button>
+        <button class="btn-switch" onclick="switchAuth('login')">Powrót</button>
+    </div>
+</div>
+<div id="header">
+    <h1>[ KIRKOWNIA / <span id="currentRoomName">OGÓLNY</span> ]</h1>
+    <button id="voiceBtn" class="btn" style="background: var(--acc-red);" onclick="toggleVoice()">MIC: OFF</button>
+</div>
+<div id="main-container">
+    <div id="sidebar">
+        <div class="section-title">Kanały</div>
+        <div id="channelList">
+            <div class="channel-link channel-active" onclick="changeChannel('ogólny', this)"># ogólny</div>
+            <div class="channel-link" onclick="changeChannel('misja-1', this)"># misja-1</div>
+        </div>
+        <div class="section-title" style="margin-top:20px">Agenci</div>
+        <div id="userList"></div>
+    </div>
+    <div id="chat-area">
+        <div id="messages"></div>
+        <div id="input-area">
+            <input type="text" id="messageInput" class="chat-input" placeholder="Raportuj..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="btn" style="background: var(--acc-green);" onclick="sendMessage()">Wyślij</button>
+        </div>
+    </div>
+</div>
+<div id="remote-audios"></div>
+<script>
+    let myNick = "", currentChannel = "ogólny", peer = null, localStream = null, activeCalls = {}, isTalking = false, talkInterval = null;
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socket = new WebSocket(protocol + window.location.host + '/chat');
+
+    function switchAuth(m) {
+        document.getElementById('loginBox').style.display = m==='login'?'block':'none';
+        document.getElementById('registerBox').style.display = m==='register'?'block':'none';
+    }
+    function doRegister() {
+        socket.send("REGISTER|"+document.getElementById('regEmail').value+"|"+document.getElementById('regNick').value+"|"+document.getElementById('regPassword').value);
+    }
+    function doLogin() {
+        socket.send("LOGIN|"+document.getElementById('loginEmail').value+"|"+document.getElementById('loginPassword').value);
+    }
+    socket.onmessage = (e) => {
+        const d = e.data;
+        if(d.startsWith("AUTH_ERROR|")) document.getElementById('errorMsg').innerText = d.split("|")[1];
+        else if(d.startsWith("REGISTER_SUCCESS|")) { switchAuth('login'); document.getElementById('errorMsg').innerText = "Konto gotowe!"; }
+        else if(d.startsWith("LOGIN_SUCCESS|")) { myNick = d.split("|")[1]; document.getElementById('login-overlay').style.display = 'none'; initPeer(); }
+        else if(d.startsWith("USERS|")) handleUsersUpdate(d.split("|")[1]);
+        else if(d.startsWith("TEXT|")) renderMessage(d.split("|")[2], d.split("|")[3]);
+        else if(d.startsWith("STATUS|")) updateTalkingUI(d.split("|")[2].split(":")[0], d.split("|")[2].split(":")[1]);
+    };
+    function initPeer() {
+        peer = new Peer(myNick);
+        peer.on('call', c => { c.answer(localStream); c.on('stream', s => addRemoteAudio(c.peer, s)); });
+    }
+    function handleUsersUpdate(raw) {
+        const list = document.getElementById('userList');
+        list.innerHTML = raw.split(",").map(u => `<div class="user-item">● ${u.split(":")[0]} <span class="user-chan">${u.split(":")[1]}</span></div>`).join("");
+        refreshVoiceConnections();
+    }
+    async function toggleVoice() {
+        const b = document.getElementById('voiceBtn');
+        if(!localStream) {
+            localStream = await navigator.mediaDevices.getUserMedia({audio:true});
+            b.innerText = "MIC: LIVE"; b.style.background = "var(--acc-green)";
+            refreshVoiceConnections();
+        } else {
+            localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled;
+            b.innerText = localStream.getAudioTracks()[0].enabled ? "MIC: LIVE" : "MIC: MUTED";
+            b.style.background = localStream.getAudioTracks()[0].enabled ? "var(--acc-green)" : "var(--acc-red)";
+        }
+    }
+    function refreshVoiceConnections() {
+        // Logika P2P...
+    }
+    function renderMessage(c, t) {
+        document.getElementById('messages').innerHTML += `<div class="msg-container"><b>${c.split(":")[0]}:</b> ${c.split(":")[1]} <span class="msg-time">${t}</span></div>`;
+        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    }
+    function sendMessage() {
+        socket.send(document.getElementById('messageInput').value);
+        document.getElementById('messageInput').value = "";
+    }
+</script>
+</body>
+</html>
