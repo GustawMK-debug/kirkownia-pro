@@ -19,11 +19,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final Set<String> availableChannels = new CopyOnWriteArraySet<>(Set.of("ogolny", "gry", "pomoc"));
+    private final Set<String> channels = new CopyOnWriteArraySet<>(Set.of("ogolny", "gry", "pomoc"));
     private final UserRepository userRepository;
     private final ChatMessageRepository messageRepository;
     private final JavaMailSender mailSender;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public ChatWebSocketHandler(UserRepository userRepository, ChatMessageRepository messageRepository, JavaMailSender mailSender) {
         this.userRepository = userRepository;
@@ -32,13 +32,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) {
         sessions.put(session.getId(), session);
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        JsonNode json = objectMapper.readTree(message.getPayload());
+        JsonNode json = mapper.readTree(message.getPayload());
         String type = json.get("type").asText();
 
         if ("REGISTER".equals(type)) {
@@ -78,12 +78,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                                 return;
                             }
                             session.getAttributes().put("user", user);
-                            session.sendMessage(new TextMessage("{\"type\":\"LOGIN_OK\",\"username\":\"" + user + "\",\"channels\":" + objectMapper.writeValueAsString(availableChannels) + "}"));
+                            session.sendMessage(new TextMessage("{\"type\":\"LOGIN_OK\",\"username\":\"" + user + "\",\"channels\":" + mapper.writeValueAsString(channels) + "}"));
                         } catch (Exception e) {}
                     },
-                    () -> {
-                        try { session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Błędne dane\"}")); } catch (Exception e) {}
-                    }
+                    () -> { try { session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Błędne dane\"}")); } catch (Exception e) {} }
             );
         } else if ("CHAT".equals(type)) {
             String user = (String) session.getAttributes().get("user");
@@ -92,31 +90,40 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 String channel = json.get("channel").asText();
                 ChatMessage chatMsg = new ChatMessage(user, content, channel, LocalDateTime.now());
                 messageRepository.save(chatMsg);
-                String resp = objectMapper.writeValueAsString(Map.of("type","CHAT","sender",user,"content",content,"channel",channel,"timestamp",chatMsg.getTimestamp().toString()));
-                for (WebSocketSession s : sessions.values()) if (s.isOpen()) s.sendMessage(new TextMessage(resp));
+                String resp = mapper.writeValueAsString(Map.of("type","CHAT","sender",user,"content",content,"channel",channel,"timestamp",chatMsg.getTimestamp().toString()));
+                broadcast(resp);
             }
         } else if ("JOIN_CHANNEL".equals(type)) {
             String ch = json.get("channel").asText();
             var hist = messageRepository.findByChannelOrderByTimestampAsc(ch);
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type","HISTORY","channel",ch,"messages",hist))));
+            session.sendMessage(new TextMessage(mapper.writeValueAsString(Map.of("type","HISTORY","channel",ch,"messages",hist))));
         } else if ("CREATE_CHANNEL".equals(type)) {
             String name = json.get("name").asText().toLowerCase().replaceAll("\\s+", "-");
-            availableChannels.add(name);
-            String upd = "{\"type\":\"CHANNELS_UPDATE\",\"channels\":" + objectMapper.writeValueAsString(availableChannels) + "}";
-            for (WebSocketSession s : sessions.values()) if (s.isOpen()) s.sendMessage(new TextMessage(upd));
+            channels.add(name);
+            broadcast("{\"type\":\"CHANNELS_UPDATE\",\"channels\":" + mapper.writeValueAsString(channels) + "}");
+        } else if ("SIGNAL".equals(type)) {
+            broadcast(message.getPayload());
         }
     }
 
+    private void broadcast(String msg) throws Exception {
+        for (WebSocketSession s : sessions.values()) if (s.isOpen()) s.sendMessage(new TextMessage(msg));
+    }
+
     private void sendEmail(String to, String code) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(to);
-        msg.setSubject("Kod weryfikacyjny - Kirkownia PRO");
-        msg.setText("Twój kod to: " + code);
-        mailSender.send(msg);
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setTo(to);
+            msg.setSubject("Kod weryfikacyjny - Kirkownia");
+            msg.setText("Twój kod: " + code);
+            mailSender.send(msg);
+        } catch (Exception e) {
+            System.err.println("Email error: " + e.getMessage());
+        }
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         sessions.remove(session.getId());
     }
 }

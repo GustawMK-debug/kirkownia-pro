@@ -16,14 +16,12 @@ public class UserAccount {
     private boolean verified = false;
 
     public UserAccount() {}
-
     public UserAccount(String email, String username, String passwordHash, String verificationCode) {
         this.email = email;
         this.username = username;
         this.passwordHash = passwordHash;
         this.verificationCode = verificationCode;
     }
-
     public Long getId() { return id; }
     public String getEmail() { return email; }
     public String getUsername() { return username; }
