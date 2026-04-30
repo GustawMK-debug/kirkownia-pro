@@ -2,88 +2,129 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>KIRKOWNIA PRO | NEBULA</title>
+    <title>KIRKOWNIA PRO | V3</title>
     <style>
-        :root { --neon-pink: #ff007f; --neon-cyan: #00f3ff; --deep-space: #0a0a12; --glass: rgba(255, 255, 255, 0.03); }
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
 
-        body { font-family: 'Orbitron', sans-serif; background: var(--deep-space); color: #fff; margin: 0; height: 100vh; overflow: hidden; display: flex; }
+        :root { --neon-blue: #00d2ff; --neon-purple: #9d00ff; --neon-pink: #ff007a; --dark-void: #020205; }
 
-        /* Animowane tło kosmosu */
-        body::before { content: ""; position: fixed; width: 200%; height: 200%; background: radial-gradient(circle, #1b2735 0%, #090a0f 100%); z-index: -1; animation: moveBg 20s linear infinite; }
-        @keyframes moveBg { from { transform: translate(-25%, -25%) rotate(0deg); } to { transform: translate(-25%, -25%) rotate(360deg); } }
+        body { margin: 0; background: var(--dark-void); color: white; font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; display: flex; }
 
-        #auth-container { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); transition: 1s; }
+        /* Animowane tło - Moving Nebula */
+        body::before {
+            content: ""; position: fixed; inset: 0; z-index: -1;
+            background: linear-gradient(45deg, #050510, #10002b, #050510);
+            background-size: 400% 400%; animation: nebulaMove 15s ease infinite;
+        }
+        @keyframes nebulaMove { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
-        .auth-box { background: rgba(255,255,255,0.05); padding: 50px; border-radius: 30px; width: 420px; text-align: center; border: 1px solid var(--neon-cyan); box-shadow: 0 0 30px var(--neon-cyan); position: relative; overflow: hidden; }
-        .auth-box::after { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(0,243,255,0.1), transparent); animation: sweep 4s infinite; }
-        @keyframes sweep { 0% { transform: translate(-100%, -100%); } 100% { transform: translate(100%, 100%); } }
+        #auth-container { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; transition: 1.2s cubic-bezier(0.8, 0, 0.2, 1); }
 
-        h1 { font-size: 2.5rem; letter-spacing: 5px; margin-bottom: 30px; text-shadow: 0 0 10px var(--neon-pink); }
-        input { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #333; background: #000; color: var(--neon-cyan); font-family: inherit; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: none; border: 2px solid var(--neon-pink); color: white; border-radius: 12px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; box-shadow: 0 0 10px var(--neon-pink); }
-        button:hover { background: var(--neon-pink); box-shadow: 0 0 25px var(--neon-pink); transform: scale(1.05); }
+        .auth-box {
+            background: rgba(255, 255, 255, 0.03); border: 2px solid var(--neon-blue);
+            padding: 50px; border-radius: 40px; width: 450px; text-align: center;
+            backdrop-filter: blur(20px); box-shadow: 0 0 40px rgba(0, 210, 255, 0.3);
+            position: relative; overflow: hidden;
+        }
 
-        #sidebar { width: 300px; background: rgba(0,0,0,0.5); backdrop-filter: blur(20px); border-right: 1px solid #333; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 30px; text-align: center; font-size: 1.5rem; font-weight: bold; border-bottom: 1px solid #333; color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan); }
-        .channel { padding: 15px 25px; margin: 10px; cursor: pointer; border-radius: 15px; transition: 0.3s; border: 1px solid transparent; }
-        .channel:hover { border-color: var(--neon-cyan); background: rgba(0,243,255,0.05); }
-        .channel.active { background: linear-gradient(90deg, var(--neon-cyan), transparent); color: black; font-weight: bold; }
+        .auth-box::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, var(--neon-blue), transparent 30%); animation: rotateBorder 4s linear infinite; z-index: -1; }
+        @keyframes rotateBorder { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .auth-inner { background: var(--dark-void); border-radius: 35px; padding: 20px; }
 
-        #chat-area { flex: 1; display: flex; flex-direction: column; background: rgba(255,255,255,0.01); }
-        #messages { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-        .message { background: var(--glass); padding: 20px; border-radius: 20px; border-left: 4px solid var(--neon-pink); animation: pop 0.4s ease-out; }
-        @keyframes pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .msg-user { color: var(--neon-cyan); font-weight: bold; margin-right: 10px; }
+        h1 { font-family: 'Syncopate', sans-serif; font-size: 2rem; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); margin-bottom: 40px; }
 
-        #input-area { padding: 30px; background: rgba(0,0,0,0.3); }
-        #msg-input { width: 100%; padding: 20px; border-radius: 20px; border: 1px solid #444; background: #000; color: white; font-size: 1rem; box-shadow: inset 0 0 10px rgba(0,0,0,1); }
+        input {
+            width: 100%; padding: 15px; margin-bottom: 25px; border-radius: 15px; border: 1px solid #333;
+            background: rgba(255,255,255,0.05); color: var(--neon-blue); font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
 
-        .vc-badge { background: #00ff00; color: black; font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; margin-left: 10px; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.2; } }
+        button {
+            width: 100%; padding: 18px; border-radius: 15px; border: none; background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            color: white; font-family: 'Syncopate', sans-serif; font-weight: bold; cursor: pointer; transition: 0.4s; letter-spacing: 2px;
+        }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--neon-purple); filter: brightness(1.2); }
+
+        #sidebar { width: 320px; background: rgba(0,0,0,0.7); border-right: 1px solid rgba(0, 210, 255, 0.2); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 40px 20px; text-align: center; font-family: 'Syncopate', sans-serif; color: var(--neon-pink); border-bottom: 1px solid #222; }
+
+        .channel {
+            padding: 15px 30px; margin: 8px 15px; cursor: pointer; border-radius: 20px;
+            transition: 0.3s; color: #666; font-weight: bold; letter-spacing: 1px;
+        }
+        .channel:hover { color: white; background: rgba(255,255,255,0.05); }
+        .channel.active { background: rgba(255, 0, 122, 0.2); color: var(--neon-pink); border: 1px solid var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 122, 0.2); }
+
+        #chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        #messages { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; }
+
+        .message {
+            background: rgba(255,255,255,0.02); padding: 25px; border-radius: 30px 30px 30px 5px;
+            border: 1px solid rgba(255,255,255,0.05); animation: messageAppear 0.5s ease-out forwards;
+        }
+        @keyframes messageAppear { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .msg-user { color: var(--neon-blue); font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px; display: block; }
+
+        #input-area { padding: 40px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+        #msg-input {
+            width: 100%; padding: 20px; border-radius: 25px; border: 1px solid #333;
+            background: #000; color: white; font-family: inherit; font-size: 1.1rem; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Voice Status Indicator */
+        .vc-card { background: rgba(0, 255, 122, 0.05); border: 1px solid #00ff7a; padding: 15px; margin: 20px; border-radius: 20px; text-align: center; }
+        .pulse-red { width: 10px; height: 10px; background: red; border-radius: 50%; display: inline-block; margin-right: 10px; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div id="auth-container">
-    <div class="auth-box" id="login-box">
-        <h1>KIRKOWNIA</h1>
-        <input type="text" id="login-username" placeholder="IDENTYFIKATOR">
-        <input type="password" id="login-password" placeholder="HASŁO">
-        <button onclick="login()">AUTORYZUJ</button>
-        <p style="margin-top:20px; font-size:0.8rem">BRAK DOSTĘPU? <span style="color:var(--neon-cyan); cursor:pointer" onclick="toggleAuth()">UTWÓRZ KONTO</span></p>
-    </div>
-    <div class="auth-box" id="register-box" style="display:none">
-        <h1>REJESTRACJA</h1>
-        <input type="email" id="reg-email" placeholder="E-MAIL">
-        <input type="text" id="reg-username" placeholder="NOWY IDENTYFIKATOR">
-        <input type="password" id="reg-password" placeholder="HASŁO">
-        <button onclick="register()">DOŁĄCZ DO SIECI</button>
-        <p style="margin-top:20px; font-size:0.8rem">MASZ KLUCZ? <span style="color:var(--neon-cyan); cursor:pointer" onclick="toggleAuth()">ZALOGUJ</span></p>
-    </div>
-    <div class="auth-box" id="verify-box" style="display:none">
-        <h1>WERYFIKACJA</h1>
-        <p>WPISZ KOD PRZESŁANY PRZEZ SATELITĘ</p>
-        <input type="text" id="verify-code" placeholder="6-CYFROWY KOD">
-        <button onclick="verify()">POTWIERDŹ</button>
+    <div class="auth-box">
+        <div class="auth-inner">
+            <div id="login-box">
+                <h1>IDENTYFIKACJA</h1>
+                <input type="text" id="login-username" placeholder="NICKNAME">
+                <input type="password" id="login-password" placeholder="PASSWORD">
+                <button onclick="login()">WEJDŹ DO SIECI</button>
+                <p style="margin-top:20px; color:#444; font-size:0.8rem; cursor:pointer" onclick="toggleAuth()">BRAK UPRAWNIEŃ? UTWÓRZ PROFIL</p>
+            </div>
+            <div id="register-box" style="display:none">
+                <h1>REJESTRACJA</h1>
+                <input type="email" id="reg-email" placeholder="EMAIL">
+                <input type="text" id="reg-username" placeholder="NICKNAME">
+                <input type="password" id="reg-password" placeholder="PASSWORD">
+                <button onclick="register()">GENERUJ DOSTĘP</button>
+                <p style="margin-top:20px; color:#444; font-size:0.8rem; cursor:pointer" onclick="toggleAuth()">POWRÓT DO LOGOWANIA</p>
+            </div>
+            <div id="verify-box" style="display:none">
+                <h1>WERYFIKACJA</h1>
+                <p style="color:var(--neon-pink)">WPISZ KLUCZ PRZESŁANY PRZEZ SATELITĘ</p>
+                <input type="text" id="verify-code" placeholder="KOD 6-CYFR">
+                <button onclick="verify()">POTWIERDŹ TOŻSAMOŚĆ</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="sidebar">
-    <div class="sidebar-header">STACJA KIRKOWNIA <span style="font-size:1rem; cursor:pointer" onclick="createChannel()">[+]</span></div>
+    <div class="sidebar-header">KIRKOWNIA PRO</div>
     <div id="channels-list"></div>
-    <div style="padding:20px">
-        <button id="vc-btn" onclick="toggleVC()" style="border-color: #00ff00; box-shadow: 0 0 10px #00ff00;">POŁĄCZ GŁOSOWO</button>
+    <div id="vc-ui" style="display:none" class="vc-card">
+        <div style="color:#00ff7a; font-weight:bold"><span class="pulse-red"></span>VOICE ACTIVE</div>
+        <button onclick="location.reload()" style="background:red; padding:5px; margin-top:10px; font-size:0.7rem">ROZŁĄCZ</button>
     </div>
+    <button id="vc-btn" onclick="toggleVC()" style="margin:20px; background:transparent; border:1px solid #00ff7a; color:#00ff7a">POŁĄCZ GŁOSOWO</button>
 </div>
 
 <div id="chat-area">
     <div id="messages"></div>
-    <div id="input-area"><input type="text" id="msg-input" placeholder="NADADAJ WIADOMOŚĆ..." onkeypress="if(event.key==='Enter') sendMessage()"></div>
+    <div id="input-area"><input type="text" id="msg-input" placeholder="NADAJ WIADOMOŚĆ..." onkeypress="if(event.key==='Enter') sendMessage()"></div>
 </div>
 
 <script>
-    let socket, currentUser, currentChannel = 'ogolny', userToVerify, pc, localStream;
+    let socket, currentUser, currentChannel = 'portal-glowny', userToVerify, pc, localStream;
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
     function connect() {
@@ -93,9 +134,10 @@
             const d = JSON.parse(e.data);
             if (d.type === 'LOGIN_OK') {
                 currentUser = d.username;
-                document.getElementById('auth-container').style.transform = 'translateY(-100%)';
+                document.getElementById('auth-container').style.opacity = '0';
+                setTimeout(() => document.getElementById('auth-container').style.display = 'none', 1200);
                 updateChannels(d.channels);
-                switchChannel('ogolny');
+                switchChannel('portal-glowny');
             } else if (d.type === 'NEED_VERIFY') {
                 userToVerify = d.username;
                 document.getElementById('login-box').style.display = 'none';
@@ -108,6 +150,7 @@
             else if (d.type === 'SIGNAL' && d.sender !== currentUser) handleSignal(d);
             else if (d.type === 'ERROR') alert(d.message);
         };
+        socket.onclose = () => setTimeout(connect, 2000);
     }
 
     function toggleAuth() {
@@ -125,7 +168,7 @@
         chs.sort().forEach(ch => {
             const div = document.createElement('div');
             div.className = `channel ${ch === currentChannel ? 'active' : ''}`;
-            div.innerHTML = `# ${ch.toUpperCase()}`;
+            div.innerText = ch.toUpperCase();
             div.onclick = () => switchChannel(ch);
             l.appendChild(div);
         });
@@ -134,7 +177,7 @@
     function switchChannel(ch) {
         currentChannel = ch;
         socket.send(JSON.stringify({type:'JOIN_CHANNEL', channel:ch}));
-        document.querySelectorAll('.channel').forEach(el => el.classList.toggle('active', el.innerText.includes(ch.toUpperCase())));
+        document.querySelectorAll('.channel').forEach(el => el.classList.toggle('active', el.innerText === ch.toUpperCase()));
     }
 
     function sendMessage() {
@@ -149,16 +192,17 @@
         const c = document.getElementById('messages'), div = document.createElement('div');
         div.className = 'message';
         const t = new Date(m.timestamp).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'});
-        div.innerHTML = `<div><span class="msg-user">${m.sender}</span> <span style="font-size:0.6rem; color:#555">${t}</span></div><div style="margin-top:10px">${m.content}</div>`;
+        div.innerHTML = `<span class="msg-user">${m.sender} // ${t}</span><div style="color:#dcddde; line-height:1.6">${m.content}</div>`;
         c.appendChild(div); c.scrollTop = c.scrollHeight;
     }
 
     async function toggleVC() {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            document.getElementById('vc-btn').innerHTML = "POŁĄCZONO <span class='vc-badge'>LIVE</span>";
+            document.getElementById('vc-ui').style.display = 'block';
+            document.getElementById('vc-btn').style.display = 'none';
             initWebRTC();
-        } catch (err) { alert("Błąd systemowy mikrofonu!"); }
+        } catch (err) { alert("Mikrofon zablokowany!"); }
     }
 
     function initWebRTC() {
@@ -176,7 +220,6 @@
         else if (d.candidate) { await pc.addIceCandidate(new RTCIceCandidate(d.candidate)); }
     }
 
-    function createChannel() { const n = prompt("NAZWA NOWEJ STREFY:"); if (n) socket.send(JSON.stringify({type:'CREATE_CHANNEL', name:n})); }
     connect();
 </script>
 </body>

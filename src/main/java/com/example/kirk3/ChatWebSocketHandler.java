@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final Set<String> channels = new CopyOnWriteArraySet<>(Set.of("ogolny", "strefa-tworcy", "cyber-pub"));
+    private final Set<String> channels = new CopyOnWriteArraySet<>(Set.of("portal-glowny", "czarna-dziura", "neon-city"));
     private final UserRepository userRepository;
     private final ChatMessageRepository messageRepository;
     private final JavaMailSender mailSender;
@@ -47,15 +47,18 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             String pass = json.get("password").asText();
 
             if (userRepository.findByUsername(user).isPresent()) {
-                session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Ten Nick jest zajęty!\"}"));
+                session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"TOŻSAMOŚĆ JUŻ ISTNIEJE!\"}"));
             } else {
                 String code = String.format("%06d", new Random().nextInt(999999));
                 UserAccount account = new UserAccount(email, user, pass, code);
                 userRepository.save(account);
 
-                // Wysyłamy maila w tle, żeby nie blokować rejestracji
-                new Thread(() -> sendEmail(email, code)).start();
+                // TA LINIA POZWOLI CI ODCZYTAĆ KOD W LOGACH RENDERA:
+                System.out.println("\n*****************************************");
+                System.out.println(">>> KOD WERYFIKACYJNY DLA " + user + ": " + code);
+                System.out.println("*****************************************\n");
 
+                new Thread(() -> sendEmail(email, code)).start();
                 session.sendMessage(new TextMessage("{\"type\":\"NEED_VERIFY\",\"username\":\"" + user + "\"}"));
             }
         } else if ("VERIFY".equals(type)) {
@@ -68,7 +71,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                         userRepository.save(u);
                         session.sendMessage(new TextMessage("{\"type\":\"REGISTER_OK\"}"));
                     } else {
-                        session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Kod jest niepoprawny!\"}"));
+                        session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"KOD BŁĘDNY!\"}"));
                     }
                 } catch (Exception e) {}
             });
@@ -86,7 +89,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                             session.sendMessage(new TextMessage("{\"type\":\"LOGIN_OK\",\"username\":\"" + user + "\",\"channels\":" + mapper.writeValueAsString(channels) + "}"));
                         } catch (Exception e) {}
                     },
-                    () -> { try { session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"Złe dane logowania!\"}")); } catch (Exception e) {} }
+                    () -> { try { session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"AUTORYZACJA ODRZUCONA!\"}")); } catch (Exception e) {} }
             );
         } else if ("CHAT".equals(type)) {
             String user = (String) session.getAttributes().get("user");
@@ -118,11 +121,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setTo(to);
-            msg.setSubject("KOD WERYFIKACYJNY - KIRKOWNIA");
-            msg.setText("Twój kod do Cyber-Przestrzeni to: " + code);
+            msg.setSubject("AUTORYZACJA KIRKOWNIA");
+            msg.setText("Klucz dostępu: " + code);
             mailSender.send(msg);
         } catch (Exception e) {
-            System.err.println("Problem z mailem (Prawdopodobnie brak hasła aplikacji): " + e.getMessage());
+            System.err.println("Email Error (Ignoruj jeśli czytasz logi): " + e.getMessage());
         }
     }
 
