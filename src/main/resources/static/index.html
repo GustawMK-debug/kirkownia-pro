@@ -20,7 +20,8 @@
         input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1rem; margin-bottom: 25px; outline: none; background: #000; color: #fff; box-sizing: border-box; transition: 0.3s; text-align: center; }
         input:focus { border-color: #555; }
         .btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; letter-spacing: 1px; }
-        .btn:hover { background: #ccc; }
+        .btn:hover:not(:disabled) { background: #ccc; }
+        .btn:disabled { background: #555; cursor: not-allowed; }
 
         /* Sidebar */
         #sidebar { width: 280px; background: var(--bg-panel); display: flex; flex-direction: column; border-right: 1px solid var(--border); }
@@ -65,7 +66,7 @@
     <div class="auth-card">
         <h2>KIRKOWNIA</h2>
         <input type="text" id="username-in" placeholder="Wpisz swój nick" maxlength="15" onkeypress="if(event.key==='Enter') startSession()">
-        <button class="btn" onclick="startSession()">WEJDŹ</button>
+        <button id="login-btn" class="btn" onclick="startSession()">WEJDŹ</button>
     </div>
 </div>
 
@@ -100,13 +101,19 @@
 <script>
     let socket, myUser, myChannel = 'ogolny', myVC = null;
     let localStream, isMuted = false, audioCtx, analyser, dataArray, pc;
+    let isConnecting = false;
 
-    // Konfiguracja WebRTC (serwery Google STUN, żeby łączyć się przez internet)
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
     function startSession() {
+        if(isConnecting) return; // Zabezpieczenie przed podwójnym zalogowaniem
         const name = document.getElementById('username-in').value.trim();
         if(!name) return;
+
+        isConnecting = true;
+        document.getElementById('login-btn').innerText = "ŁĄCZENIE...";
+        document.getElementById('login-btn').disabled = true;
+
         myUser = name;
         document.getElementById('my-name').innerText = name;
 
@@ -161,8 +168,8 @@
     function appendMsg(m) {
         const cont = document.getElementById('messages-container');
         const div = document.createElement('div'); div.className = 'msg-block';
-        const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        div.innerHTML = `<div class="msg-meta"><span class="msg-author">${m.sender}</span> <span>${time}</span></div><div class="msg-text">${m.content}</div>`;
+        // Wykorzystujemy timestamp ze Stringa, unikając błędów JS
+        div.innerHTML = `<div class="msg-meta"><span class="msg-author">${m.sender}</span> <span>${m.timestamp}</span></div><div class="msg-text">${m.content}</div>`;
         cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
     }
 
@@ -185,7 +192,7 @@
         }
 
         socket.send(JSON.stringify({type:'VC_JOIN', vcName:name}));
-        initWebRTC(); // Inicjalizacja połączenia audio po dołączeniu!
+        initWebRTC();
     }
 
     function renderVC(data) {
@@ -214,11 +221,13 @@
     }
 
     function startVoiceDetection() {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(localStream);
-        analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
-        source.connect(analyser); dataArray = new Uint8Array(analyser.frequencyBinCount);
-        loop();
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaStreamSource(localStream);
+            analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
+            source.connect(analyser); dataArray = new Uint8Array(analyser.frequencyBinCount);
+            loop();
+        } catch(e) { console.error("AudioContext error", e); }
     }
 
     function loop() {
@@ -234,41 +243,40 @@
         });
     }
 
-    // --- LOGIKA WEBRTC (DŹWIĘK) ---
     function initWebRTC() {
-        if (pc) pc.close();
-        pc = new RTCPeerConnection(rtcConfig);
+        try {
+            if (pc) pc.close();
+            pc = new RTCPeerConnection(rtcConfig);
 
-        localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+            localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
 
-        pc.onicecandidate = e => {
-            if (e.candidate) socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, candidate:e.candidate}));
-        };
+            pc.onicecandidate = e => {
+                if (e.candidate) socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, candidate:e.candidate}));
+            };
 
-        pc.ontrack = e => {
-            document.getElementById('remote-audio').srcObject = e.streams[0];
-        };
+            pc.ontrack = e => {
+                document.getElementById('remote-audio').srcObject = e.streams[0];
+            };
 
-        pc.createOffer().then(o => {
-            pc.setLocalDescription(o);
-            socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, offer:o}));
-        });
+            pc.createOffer().then(o => {
+                pc.setLocalDescription(o);
+                socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, offer:o}));
+            });
+        } catch(e) { console.error("WebRTC Error", e); }
     }
 
     async function handleSignal(d) {
-        if (!pc) initWebRTC();
-        if (d.offer) {
-            await pc.setRemoteDescription(new RTCSessionDescription(d.offer));
-            const a = await pc.createAnswer();
-            await pc.setLocalDescription(a);
-            socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, answer:a}));
-        }
-        else if (d.answer) {
-            await pc.setRemoteDescription(new RTCSessionDescription(d.answer));
-        }
-        else if (d.candidate) {
-            await pc.addIceCandidate(new RTCIceCandidate(d.candidate));
-        }
+        try {
+            if (!pc) initWebRTC();
+            if (d.offer) {
+                await pc.setRemoteDescription(new RTCSessionDescription(d.offer));
+                const a = await pc.createAnswer();
+                await pc.setLocalDescription(a);
+                socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, answer:a}));
+            }
+            else if (d.answer) { await pc.setRemoteDescription(new RTCSessionDescription(d.answer)); }
+            else if (d.candidate) { await pc.addIceCandidate(new RTCIceCandidate(d.candidate)); }
+        } catch(e) { console.error("Signal Error", e); }
     }
 </script>
 </body>

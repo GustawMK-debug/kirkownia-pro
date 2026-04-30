@@ -1,7 +1,6 @@
 package com.example.kirk3;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 public class ChatMessage {
@@ -11,10 +10,10 @@ public class ChatMessage {
     private String sender;
     private String content;
     private String channel;
-    private LocalDateTime timestamp;
+    private String timestamp; // Zmieniono na String, żeby Jackson się nie dławił!
 
     public ChatMessage() {}
-    public ChatMessage(String sender, String content, String channel, LocalDateTime timestamp) {
+    public ChatMessage(String sender, String content, String channel, String timestamp) {
         this.sender = sender;
         this.content = content;
         this.channel = channel;
@@ -25,5 +24,5 @@ public class ChatMessage {
     public String getSender() { return sender; }
     public String getContent() { return content; }
     public String getChannel() { return channel; }
-    public LocalDateTime getTimestamp() { return timestamp; }
+    public String getTimestamp() { return timestamp; }
 }
