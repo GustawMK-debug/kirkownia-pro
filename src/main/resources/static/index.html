@@ -203,4 +203,224 @@
     function sendMsg() {
         const i = document.getElementById('chat-input');
         if(i.value.trim() !== '' && socket.readyState === WebSocket.OPEN) {
-            socket.send
+            socket.send(JSON.stringify({type:'CHAT', content:i.value.trim(), channel:myChannel}));
+            i.value = '';
+        }
+    }
+
+    function uploadImage(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        if(file.size > 4 * 1024 * 1024) {
+            alert("Plik jest za duży! (Maksymalnie 4MB)");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64Image = e.target.result;
+            if(socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({type:'CHAT', content: "IMG:" + base64Image, channel:myChannel}));
+            }
+        };
+        reader.readAsDataURL(file);
+        event.target.value = '';
+    }
+
+    function appendMsg(m) {
+        const cont = document.getElementById('messages-container');
+        const div = document.createElement('div'); div.className = 'msg-block';
+
+        let displayContent = "";
+        if (m.content.startsWith("IMG:data:image")) {
+            const b64 = m.content.substring(4);
+            displayContent = `<img src="${b64}" class="chat-image" onclick="window.open(this.src)">`;
+        } else {
+            let safeText = m.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const imgRegex = /(https?:\/\/[^\s]+(?:\.jpg|\.jpeg|\.png|\.gif|\.webp)[^\s]*)/ig;
+            if(imgRegex.test(safeText)) {
+                safeText = safeText.replace(imgRegex, '<img src="$1" class="chat-image">');
+            }
+            displayContent = safeText;
+        }
+
+        div.innerHTML = `<div class="msg-meta"><span class="msg-author">${m.sender}</span> <span>${m.timestamp}</span></div><div class="msg-text">${displayContent}</div>`;
+        cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
+    }
+
+    // --- SYSTEM VOICE ---
+
+    async function joinVoice(name) {
+        if(myVC === name) return;
+        if(myVC !== null) leaveVoice(false);
+
+        myVC = name;
+        document.getElementById('user-ctrl').style.visibility = 'visible';
+
+        if(!localStream) {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({audio:true});
+                localStream.getAudioTracks()[0].enabled = !isMuted;
+                startVoiceDetection();
+            } catch(e) { alert("Musisz zezwolić na użycie mikrofonu!"); myVC = null; return; }
+        }
+
+        if(socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({type:'VC_JOIN', vcName:name}));
+        }
+    }
+
+    function leaveVoice(hidePanel = true) {
+        for (let user in peerConnections) {
+            peerConnections[user].close();
+            let audioEl = document.getElementById('audio-' + user);
+            if(audioEl) audioEl.remove();
+        }
+        peerConnections = {};
+
+        if (localStream) {
+            localStream.getTracks().forEach(t => t.stop());
+            localStream = null;
+        }
+
+        myVC = null;
+
+        if(hidePanel) {
+            document.getElementById('user-ctrl').style.visibility = 'hidden';
+        }
+        if(socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({type:'VC_LEAVE'}));
+        }
+    }
+
+    function renderVC(data) {
+        document.querySelectorAll('.vc-user-list').forEach(el => el.innerHTML = '');
+        for(let vc in data) {
+            const cont = document.getElementById('users-' + vc);
+            if(cont) {
+                for(let sid in data[vc]) {
+                    const div = document.createElement('div');
+                    div.className = 'vc-user';
+                    div.dataset.name = data[vc][sid];
+                    div.innerHTML = `<div class="dot"></div> ${data[vc][sid]}`;
+                    cont.appendChild(div);
+                }
+            }
+        }
+    }
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        if(localStream) {
+            localStream.getAudioTracks()[0].enabled = !isMuted;
+        }
+        updateMuteBtnUI();
+    }
+
+    function updateMuteBtnUI() {
+        const btn = document.getElementById('m-btn');
+        btn.classList.toggle('active', isMuted);
+        btn.innerText = isMuted ? '🔇' : '🎤';
+    }
+
+    function startVoiceDetection() {
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaStreamSource(localStream);
+            analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
+            source.connect(analyser); dataArray = new Uint8Array(analyser.frequencyBinCount);
+            loop();
+        } catch(e) {}
+    }
+
+    function loop() {
+        if(!localStream) return;
+        analyser.getByteFrequencyData(dataArray);
+        let vol = dataArray.reduce((a,b) => a+b) / dataArray.length;
+        if(socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({type:'VC_STATE', username:myUser, speaking: (vol > 10 && !isMuted)}));
+        }
+        setTimeout(loop, 200);
+    }
+
+    function updateVisualSpeak(d) {
+        document.querySelectorAll('.vc-user').forEach(el => {
+            if(el.dataset.name === d.username) el.classList.toggle('speaking', d.speaking);
+        });
+    }
+
+    function syncMeshConnections(allVoiceData) {
+        if(!myVC || !allVoiceData[myVC]) return;
+
+        let usersInMyRoom = Object.values(allVoiceData[myVC]);
+
+        for(let user in peerConnections) {
+            if(!usersInMyRoom.includes(user)) {
+                peerConnections[user].close();
+                delete peerConnections[user];
+                let a = document.getElementById('audio-' + user);
+                if(a) a.remove();
+            }
+        }
+
+        usersInMyRoom.forEach(user => {
+            if(user !== myUser && !peerConnections[user]) {
+                createPeer(user);
+                if(myUser < user) {
+                    let pc = peerConnections[user];
+                    pc.createOffer().then(o => {
+                        pc.setLocalDescription(o);
+                        socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, target:user, offer:o}));
+                    });
+                }
+            }
+        });
+    }
+
+    function createPeer(targetUser) {
+        let pc = new RTCPeerConnection(rtcConfig);
+        peerConnections[targetUser] = pc;
+
+        if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+        pc.onicecandidate = e => {
+            if(e.candidate && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, target:targetUser, candidate:e.candidate}));
+            }
+        };
+
+        pc.ontrack = e => {
+            let audioEl = document.getElementById('audio-' + targetUser);
+            if(!audioEl) {
+                audioEl = document.createElement('audio');
+                audioEl.id = 'audio-' + targetUser;
+                audioEl.autoplay = true;
+                document.body.appendChild(audioEl);
+            }
+            audioEl.srcObject = e.streams[0];
+        };
+    }
+
+    async function handleSignal(d) {
+        if(d.target !== myUser) return;
+
+        let targetUser = d.sender;
+        if(!peerConnections[targetUser]) {
+            createPeer(targetUser);
+        }
+
+        let pc = peerConnections[targetUser];
+
+        try {
+            if (d.offer) {
+                await pc.setRemoteDescription(new RTCSessionDescription(d.offer));
+                const a = await pc.createAnswer();
+                await pc.setLocalDescription(a);
+                socket.send(JSON.stringify({type:'SIGNAL', sender:myUser, target:targetUser, answer:a}));
+            }
+            else if (d.answer) { await pc.setRemoteDescription(new RTCSessionDescription(d.answer)); }
+            else if (d.candidate) { await pc.addIceCandidate(new RTCIceCandidate(d.candidate)); }
+        } catch(e) { console.log(e); }
+    }
+</script>
+</body>
+</html>
