@@ -1,13 +1,18 @@
 package com.example.kirk3;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import jakarta.annotation.PostConstruct;
+import java.util.TimeZone;
 
-@SpringBootTest
-class Kirk3ApplicationTests {
-
-    @Test
-    void contextLoads() {
+@SpringBootApplication
+public class Kirk3Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Kirk3Application.class, args);
     }
 
+    @PostConstruct
+    public void init() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Warsaw"));
+    }
 }

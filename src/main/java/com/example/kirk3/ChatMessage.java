@@ -20,6 +20,7 @@ public class ChatMessage {
         this.channel = channel;
         this.timestamp = timestamp;
     }
+
     public Long getId() { return id; }
     public String getSender() { return sender; }
     public String getContent() { return content; }
