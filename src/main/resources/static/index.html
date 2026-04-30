@@ -13,17 +13,15 @@
 
         body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        /* Ekran Logowania */
         #auth-overlay { position: fixed; inset: 0; z-index: 1000; background: var(--bg-main); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease; }
         .auth-card { width: 340px; padding: 40px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .auth-card h2 { font-weight: 400; letter-spacing: 3px; margin-bottom: 30px; color: var(--accent); }
         input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 1rem; margin-bottom: 25px; outline: none; background: #000; color: #fff; box-sizing: border-box; transition: 0.3s; text-align: center; }
         input:focus { border-color: #555; }
-        .btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; letter-spacing: 1px; }
+        .btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; }
         .btn:hover:not(:disabled) { background: #ccc; }
         .btn:disabled { background: #555; cursor: not-allowed; }
 
-        /* Sidebar */
         #sidebar { width: 280px; background: var(--bg-panel); display: flex; flex-direction: column; border-right: 1px solid var(--border); }
         .sidebar-title { padding: 30px 25px 10px; font-weight: 600; font-size: 0.75rem; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; }
 
@@ -31,20 +29,19 @@
         .nav-item:hover { color: var(--text-main); background: var(--bg-hover); }
         .nav-item.active { color: var(--accent); background: var(--bg-hover); font-weight: 500; }
 
-        /* Lista VC */
         .vc-user-list { padding-left: 45px; margin-bottom: 10px; font-size: 0.85rem; }
         .vc-user { padding: 5px 0; color: var(--text-muted); transition: 0.3s; display: flex; align-items: center; gap: 8px; }
         .vc-user.speaking { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
         .dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; opacity: 0; transition: 0.2s; }
         .speaking .dot { opacity: 1; transform: scale(1.2); }
 
-        /* Dolny panel użytkownika */
         .user-panel { margin-top: auto; padding: 20px; background: var(--bg-panel); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .mute-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-main); cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
-        .mute-btn:hover { background: var(--bg-hover); }
-        .mute-btn.active { background: #3a1c1c; border-color: #ff4444; color: #ff4444; }
+        .ctrl-btns { display: flex; gap: 8px; }
+        .icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-main); cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
+        .icon-btn:hover { background: var(--bg-hover); }
+        .icon-btn.active { background: #3a1c1c; border-color: #ff4444; color: #ff4444; }
+        .leave-btn:hover { background: #3a1c1c; border-color: #ff4444; }
 
-        /* Czat */
         #main-view { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); }
         #chat-header { padding: 25px 30px; border-bottom: 1px solid var(--border); font-weight: 500; font-size: 1.1rem; color: var(--accent); }
 
@@ -55,9 +52,14 @@
         .msg-author { color: var(--accent); font-weight: 600; font-size: 0.95rem; }
         .msg-text { color: var(--text-main); line-height: 1.5; font-size: 0.95rem; }
 
-        #input-wrapper { padding: 20px 30px; }
-        #chat-input { width: 100%; padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); outline: none; transition: 0.2s; box-sizing: border-box; }
+        #input-wrapper { padding: 20px 30px; display: flex; gap: 10px; }
+        #chat-input { flex: 1; padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text-main); outline: none; transition: 0.2s; box-sizing: border-box; margin: 0; }
         #chat-input:focus { border-color: #555; }
+        .img-btn { width: 52px; background: var(--bg-panel); border: 1px solid var(--border); color: #fff; border-radius: 8px; cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
+        .img-btn:hover { background: var(--bg-hover); border-color: #555; }
+
+        /* Upiększone obrazki na czacie */
+        .chat-image { max-width: 300px; max-height: 300px; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; display: block; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -84,7 +86,10 @@
 
     <div class="user-panel" id="user-ctrl" style="visibility: hidden">
         <span id="my-name" style="font-size: 0.9rem; font-weight: 500;"></span>
-        <button class="mute-btn" id="m-btn" onclick="toggleMute()" title="Wycisz mikrofon">🎤</button>
+        <div class="ctrl-btns">
+            <button class="icon-btn" id="m-btn" onclick="toggleMute()" title="Wycisz mikrofon">🎤</button>
+            <button class="icon-btn leave-btn" onclick="leaveVoice()" title="Opustić Voice">❌</button>
+        </div>
     </div>
 </div>
 
@@ -92,7 +97,8 @@
     <div id="chat-header"># <span id="ch-name">ogolny</span></div>
     <div id="messages-container"></div>
     <div id="input-wrapper">
-        <input type="text" id="chat-input" placeholder="Napisz wiadomość..." onkeypress="if(event.key==='Enter') sendMsg()">
+        <button class="img-btn" onclick="promptImage()" title="Wyślij GIF / Obrazek">🖼️</button>
+        <input type="text" id="chat-input" placeholder="Napisz wiadomość lub wklej link do GIFa..." onkeypress="if(event.key==='Enter') sendMsg()">
     </div>
 </div>
 
@@ -106,7 +112,7 @@
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
     function startSession() {
-        if(isConnecting) return; // Zabezpieczenie przed podwójnym zalogowaniem
+        if(isConnecting) return;
         const name = document.getElementById('username-in').value.trim();
         if(!name) return;
 
@@ -127,7 +133,6 @@
             if(d.type === 'LOGIN_OK') {
                 document.getElementById('auth-overlay').style.opacity = '0';
                 setTimeout(() => document.getElementById('auth-overlay').style.display = 'none', 800);
-                document.getElementById('user-ctrl').style.visibility = 'visible';
                 buildNav(d.channels);
                 switchChannel('ogolny');
             } else if(d.type === 'CHAT' && d.channel === myChannel) {
@@ -165,25 +170,51 @@
         socket.send(JSON.stringify({type:'JOIN_CHANNEL', channel:c}));
     }
 
-    function appendMsg(m) {
-        const cont = document.getElementById('messages-container');
-        const div = document.createElement('div'); div.className = 'msg-block';
-        // Wykorzystujemy timestamp ze Stringa, unikając błędów JS
-        div.innerHTML = `<div class="msg-meta"><span class="msg-author">${m.sender}</span> <span>${m.timestamp}</span></div><div class="msg-text">${m.content}</div>`;
-        cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
+    function promptImage() {
+        const url = prompt("Wklej link do obrazka lub GIFa (z końcówką .png, .jpg, .gif):");
+        if(url && url.trim() !== '') {
+            socket.send(JSON.stringify({type:'CHAT', content:url.trim(), channel:myChannel}));
+        }
     }
 
     function sendMsg() {
         const i = document.getElementById('chat-input');
         if(i.value.trim() !== '') {
-            socket.send(JSON.stringify({type:'CHAT', content:i.value, channel:myChannel}));
+            socket.send(JSON.stringify({type:'CHAT', content:i.value.trim(), channel:myChannel}));
             i.value = '';
         }
     }
 
+    function appendMsg(m) {
+        const cont = document.getElementById('messages-container');
+        const div = document.createElement('div'); div.className = 'msg-block';
+
+        // Zabezpieczenie przed HTML Injection
+        let safeText = m.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Magia! Automatyczna detekcja linków do obrazków i zamiana ich na <img src="...">
+        const imgRegex = /(https?:\/\/[^\s]+(?:\.jpg|\.jpeg|\.png|\.gif|\.webp)[^\s]*)/ig;
+        if(imgRegex.test(safeText)) {
+            safeText = safeText.replace(imgRegex, '<img src="$1" class="chat-image">');
+        }
+
+        div.innerHTML = `<div class="msg-meta"><span class="msg-author">${m.sender}</span> <span>${m.timestamp}</span></div><div class="msg-text">${safeText}</div>`;
+        cont.appendChild(div); cont.scrollTop = cont.scrollHeight;
+    }
+
+    // --- SYSTEM VOICE CHAT ---
+
     async function joinVoice(name) {
         if(myVC === name) return;
+
+        // ZABÓJCA DUCHÓW: Jeśli zmieniasz kanał, najpierw zamknij stare połączenie
+        if(myVC !== null) {
+            leaveVoice(false); // wyjdź, ale nie chowaj panelu (bo zaraz wchodzisz na nowy)
+        }
+
         myVC = name;
+        document.getElementById('user-ctrl').style.visibility = 'visible';
+
         if(!localStream) {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({audio:true});
@@ -193,6 +224,33 @@
 
         socket.send(JSON.stringify({type:'VC_JOIN', vcName:name}));
         initWebRTC();
+    }
+
+    function leaveVoice(hidePanel = true) {
+        // ZABÓJCA DUCHÓW: Bezwzględne zamykanie i czyszczenie streamów
+        if (pc) {
+            pc.close();
+            pc = null;
+        }
+        if (localStream) {
+            localStream.getTracks().forEach(t => t.stop());
+            localStream = null;
+        }
+
+        myVC = null;
+        isMuted = false;
+
+        // Resetowanie UI
+        document.getElementById('m-btn').classList.remove('active');
+        document.getElementById('m-btn').innerText = '🎤';
+        document.getElementById('remote-audio').srcObject = null;
+
+        if(hidePanel) {
+            document.getElementById('user-ctrl').style.visibility = 'hidden';
+        }
+
+        // Poinformuj serwer, że wyszedłeś, żeby inni przestali Cię widzieć i słyszeć
+        socket.send(JSON.stringify({type:'VC_LEAVE'}));
     }
 
     function renderVC(data) {
@@ -231,6 +289,7 @@
     }
 
     function loop() {
+        if(!localStream) return; // Zabezpieczenie przed pętlą po wyjściu z kanału
         analyser.getByteFrequencyData(dataArray);
         let vol = dataArray.reduce((a,b) => a+b) / dataArray.length;
         socket.send(JSON.stringify({type:'VC_STATE', username:myUser, speaking: (vol > 10 && !isMuted)}));
