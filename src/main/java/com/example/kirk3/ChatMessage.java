@@ -1,14 +1,11 @@
 package com.example.kirk3;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 public class ChatMessage {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,17 +15,17 @@ public class ChatMessage {
     private LocalDateTime timestamp;
 
     public ChatMessage() {}
-    public ChatMessage(String sender, String content, String channel) {
+
+    public ChatMessage(String sender, String content, String channel, LocalDateTime timestamp) {
         this.sender = sender;
         this.content = content;
         this.channel = channel;
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = timestamp;
     }
 
+    public Long getId() { return id; }
     public String getSender() { return sender; }
     public String getContent() { return content; }
     public String getChannel() { return channel; }
-    public String getFormattedTime() {
-        return timestamp.format(DateTimeFormatter.ofPattern("HH:mm"));
-    }
+    public LocalDateTime getTimestamp() { return timestamp; }
 }

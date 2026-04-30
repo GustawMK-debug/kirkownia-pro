@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 public class UserAccount {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,6 +25,8 @@ public class UserAccount {
         this.passwordHash = passwordHash;
     }
 
+    public Long getId() { return id; }
+    public String getEmail() { return email; }
     public String getUsername() { return username; }
     public String getPasswordHash() { return passwordHash; }
 }
